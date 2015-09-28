@@ -1,0 +1,54 @@
+    > Ich muss den Dialog jedesmal neu Aufbauen und auswerten, um die aktuellen Inhalt der benutzten Variablen zu haben
+
+
+Naja, dann ginge es noch so:
+
+func DlgNiclaus()
+{
+  var jump;
+  DlgText("Was willst du?");
+  if (DlgOption("Was zu essen"))
+  {
+    if (DlgEvent()) player->CreateContents(Bread);
+    DlgText("Hier, nimm dieses Brot!");
+    DlgText("Danke", player);
+    DlgReset();
+  }
+  if (DlgOption("Ich suche etwas"))
+  {
+    DlgText("Kein Problem, was denn?");
+    if (DlgOption("Wo ist das Gold?")) DlgText("Gold ist in der Hoehle.");
+    if (DlgOption("Wo sind die Rubine?")) DlgText("Rubine sind in der Hoehle");
+    if (DlgOption("Wo ist Niklaus?")) DlgText("Beats me.");
+    if (DlgOption("Kann man auch im Dialog kreuz und quer springen?")) jump = true;
+    if (DlgOption("Ich suche doch nix...")) DlgReset();
+    DlgOptionEnd();
+  }
+  if (DlgOption("Kann man auch im Dialog kreuz und quer springen?")) jump = true;
+  // Mehrere Pfade zum gleichen Dialogteil
+  if (jump) DlgText("Ja, springen geht auch.");
+}
+
+
+Das sieht auch fast aus wie die Arrays - aber es sind keine Scripte in Strings und man kann sogar Bloecke, Variablen, etc., benutzen.
+
+Der Trick waere dann: DlgOption, DlgText und DlgEvent zaehlen mit, wo sie gerade sind. DlgOption fuegt die Option hinzu und gibt false zurueck. Wenn man sie auswaehlt, wird DlgNiclaus neu aufgerufen, die anderen Optionen ignoriert und die DlgOption-Auswahl gibt true zurueck, so dass der Code im Block laeuft. Bei den DlgTexts/DlgEvents wird mitgezaehlt und dann nur der n-te tatsaechlich angezeigt/ausgefuehrt. Das Ende der Ebene wird definiert ueber DlgOptionEnd oder ein DlgOption nach einem nicht-DlgOption. Wenn die Dialogposition am Ende ist, wird einfach eine Ebene zurueck gesprungen.
+
+Nummern brauchst du dann auch nicht, weil die intern von DlgOption/DlgText vergeben werden. Quer springen im Dialog (wenn zwei Optionen zum gleichen Ziel fuehren) geht einfach mit Variablen.
+
+Und viel Code wird auch nicht ausgefuehrt, weil nicht ausgefuehrte Optionen/Texte/etc. nur die Dialogposition pruefen und dann ggf. nichts tun. Nicht aktive Bloecke werden gar nicht erst ausgefuehrt (weil DlgOption false zurueck gibt).
+
+Nur das zu implementieren ist etwas komplizierter :P 
+
+-------------------------------
+
+Genau, das was du in dem neuen Beispiel ansprichst, ist mir auch noch aufgefallen: Wenn man eine Abfolge von mehreren Textboxen hat, dann sind es momentan immer wieder dieselben Zeilen mit anderem Text und anderer Dialog-Nummer.
+Die Nummern würde ich beibehalten, damit man von einer Option zu einer anderen springen kann.
+
+Evtl. ist es auch sinnvoller, bei einem Dialog die gültigen Kinder-Optionen anzugeben anstatt der erlauben Eltern-Optionen, in folgenden Modi:
+a) Alle Optionen anzeigen
+b) Alle Optionen zu einem bestimmten Thema = String anzeigen
+c) Nur Optionen des aktuellen Pfads anzeigen (das dürfte obsolet sein, wenn die Pfade ohne weitere Auswahlmöglichkeit sowieso anders behandelt werden)
+d) Zusätzliche spezifische Optionen nach Dialog-Nummer.
+
+Es müsste außerdem beide Möglichkeiten zum Abrufen von Variablen geben, per eval() und normal. Ich habe die eval-Dinger z.b. eingebaut weil das Aufbauen zu Laufzeit auch ein Hindernis hat: Ich muss den Dialog jedesmal neu Aufbauen und auswerten, um die aktuellen Inhalt der benutzten Variablen zu haben. Bei der Array-Methode wurden jeweils nur die Variablen abgefragt, die ich gerade als Condition/Event prüfe. Ist verständlich, was ich meine? 
