@@ -1,24 +1,60 @@
-
-global func DlgText(string text, object speaker)
+// Sets a new dialogue for a npc.
+global func SetDialogueEx(string name)
 {
-	// TODO
-	MessageBox(text, speaker, speaker);	
+	if (!this)
+		return;
+	var dialogue = CreateObject(Library_Dialogue, 0, 0, NO_OWNER);
+	
+	dialogue->SetObjectLayer(nil);
+	dialogue.Plane = this.Plane+1; // for proper placement of the attention symbol
+	dialogue.dlg_name = name;
+
+	return dialogue;
 }
 
-global func DlgOption(string text)
+public func DlgText(string text, object speaker)
 {
+	Log("Progress is %d, visiting %d (%s)", dlg_progress, dlg_internal, text);
 	// TODO
+	if (dlg_internal == dlg_progress)
+	{
+		MessageBox(text, dlg_target, speaker);
+	}
+	++dlg_internal;
 }
 
-global func DlgReset()
+public func DlgOption(string text)
 {
 	// TODO
+	var result = dlg_internal == dlg_progress;
+	if (result)
+	{
+		++dlg_option;
+	}
+	++dlg_internal;
+	return result || dlg_option > 0;
 }
 
-global func DlgOptionEnd()
+public func DlgReset()
+{
+	// TODO
+	if (dlg_internal == dlg_progress)
+	{
+		dlg_progress = 0;
+	}
+	++dlg_internal;
+}
+
+public func DlgOptionEnd()
 {
 	// TODO
 	// not sure if this is necessary
+	// it is!
+	if (dlg_internal == dlg_progress)
+	{
+		dlg_option = Max(0, dlg_option -1);
+	}
+	++dlg_internal;
 }
 
 global func DlgEvent()
@@ -33,17 +69,29 @@ global func DlgEvent()
 local dlg_target; // the npc that provides this dialogue?
 local dlg_name;
 local dlg_info;
-local dlg_progress;
+local dlg_progress; // the player progress
+local dlg_internal; // the internal id
 local dlg_section;   // if set, this string is included in progress callbacks (i.e., func Dlg_[Name]_[Section][Progress]() is called)
 local dlg_status;
 local dlg_interact;  // default true. can be set to false to deactivate the dialogue
 local dlg_attention; // if set, a red attention mark is put above the clonk
 local dlg_broadcast; // if set, all non-message (i.e. menu) MessageBox calls are called as MessageBoxBroadcast.
-
+local dlg_option; // branch depth
 
 //-------------------------------------------------------------------------
 // internal functions
 
+protected func Initialize()
+{
+	ResetDialogue();
+	_inherited(...);
+}
+
+private func ResetDialogue()
+{
+	dlg_progress = -1;
+	dlg_internal = -1;
+}
 
 private func InDialogue(object player)
 {
@@ -107,18 +155,29 @@ public func Interact(object player)
 
 	// Start conversation context.
 	// Update dialogue progress first.
+	dlg_target = player;
 	var progress = dlg_progress;
 	dlg_progress++;
+	dlg_internal = 0;
 	// Then call relevant functions.
 	// Call generic function first, then progress function
-	var fn_generic = Format("~Dlg_%s", dlg_name);
-	var fn_progress = Format("~Dlg_%s_%s%d", dlg_name, dlg_section ?? "", progress);
-	if (!Call(fn_generic, player))
-		if (!GameCall(fn_generic, this, player, dlg_target))
-			if (!Call(fn_progress, player))
-				GameCall(fn_progress, this, player, dlg_target);
-
+	//var fn_generic = Format("~Dlg_%s", dlg_name);
+	//var fn_progress = Format("~Dlg_%s_%s%d", dlg_name, dlg_section ?? "", progress);
+	//if (!Call(fn_generic, player))
+	//	if (!GameCall(fn_generic, this, player, dlg_target))
+	//		if (!Call(fn_progress, player))
+	//			GameCall(fn_progress, this, player, dlg_target);
+	var fn_generic = Format("Dlg_%s", dlg_name);
+	Call(fn_generic, player);
 	return true;
+}
+
+
+public func MenuOK(proplist menu_id, object clonk)
+{
+	// prevent the menu from closing when pressing MenuOK
+	if (dlg_interact)
+		Interact(clonk);
 }
 
 //------------------------------------------------------------------------
