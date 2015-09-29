@@ -28,7 +28,7 @@ public func DlgReset()
 	// TODO
 	if (dlg_internal == dlg_progress)
 	{
-		dlg_progress = 0;
+		ResetDialogue();
 	}
 	++dlg_internal;
 }
