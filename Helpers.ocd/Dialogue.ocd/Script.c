@@ -20,8 +20,7 @@
  */
 global func SetDialogueEx(string name, bool attention)
 {
-	if (!this)
-		return;
+	if (!this) return;
 	var dialogue = CreateObject(DialogueEx, 0, 0, NO_OWNER);
 	dialogue->InitDialogue(name, this, attention);
 	
@@ -223,46 +222,13 @@ public func CallDialogue(object clonk, progress, string section)
 public func Interact(object clonk)
 {
 	// Should not happen: not active -> stop interaction
-	if (!dlg_interact)
-		return true;	
-	
-	// Currently in a dialogue: abort that dialogue.
-	//if (InDialogue(clonk))
-	//	clonk->CloseMenu();	
-	
-	// No conversation context: abort.
-	//if (!dlg_name)
-	//	return true;
-		
-	// Dialogue still waiting? Do nothing then
-	// (A sound might be nice here)
-	//if (dlg_status == DLG_Status_Wait)
-	//{
-	//	return true;
-	//}
-		
-	// Stop dialogue?
-	//if (dlg_status == DLG_Status_Stop)
-	//{
-	//	clonk->CloseMenu();
-	//	dlg_status = DLG_Status_Active;
-	//	return true;
-	//}
-	// Remove dialogue?
-	//if (dlg_status == DLG_Status_Remove)
-	//{
-	//	clonk->CloseMenu();
-	//	RemoveObject();
-	//	return true;		
-	//}
+	if (!dlg_interact) return true;	
+
+	SetSpeakerDirs(dlg_target, clonk); // Have speakers face each other
 
 	if (ProgressDialogue(clonk))
 	{	
-		// Remove attention mark on first interaction
-		RemoveAttention();
-		
-		// Have speakers face each other
-		SetSpeakerDirs(dlg_target, clonk);
+		RemoveAttention(); // Remove attention mark on first interaction
 	}
 
 	return true;
@@ -272,8 +238,7 @@ public func Interact(object clonk)
 public func MenuOK(proplist menu_id, object clonk)
 {
 	// prevent the menu from closing when pressing MenuOK
-	if (dlg_interact)
-		Interact(clonk);
+	if (dlg_interact) Interact(clonk);
 }
 
 public func SetSpeakerDirs(object speaker1, object speaker2)

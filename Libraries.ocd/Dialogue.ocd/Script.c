@@ -103,13 +103,16 @@ private func CloseMessageBox(object player)
  */
 public func ProgressDialogue(object player)
 {
+	// No conversation context: abort.
+	if (!dlg_name)
+	{
+		FatalError("This function needs a dialogue name, but it is not set.");
+	}
+
 	// Currently in a dialogue: abort that dialogue.
 	if (InDialogue(player))
 		CloseMessageBox(player);	
-	
-	// No conversation context: abort.
-	//if (!dlg_name)
-	//	return true;
+
 		
 	// Dialogue still waiting? Do nothing then
 	// (A sound might be nice here)
@@ -134,13 +137,6 @@ public func ProgressDialogue(object player)
 		return false;		
 	}
 	
-	// Remove attention mark on first interaction
-	// RemoveAttention();
-	
-	// this is actually a part of the speaker object!
-	// Have speakers face each other
-	// SetSpeakerDirs(dlg_target, clonk);
-
 	// Start conversation context.
 	// Update dialogue progress first.
 	dlg_target = player;
