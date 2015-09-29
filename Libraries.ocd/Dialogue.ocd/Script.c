@@ -6,7 +6,7 @@ public func DlgText(string text, object speaker)
 	// TODO
 	if (dlg_internal == dlg_progress)
 	{
-		MessageBox(text, dlg_target, speaker);
+		MessageBox(text, dlg_player, speaker);
 	}
 	++dlg_internal;
 }
@@ -55,6 +55,7 @@ public func DlgEvent()
 // properties
 
 local dlg_target; // the npc that provides this dialogue?
+local dlg_player; // the player who we are talking to
 local dlg_name;
 local dlg_info;
 local dlg_progress; // the player progress
@@ -139,7 +140,7 @@ public func ProgressDialogue(object player)
 	
 	// Start conversation context.
 	// Update dialogue progress first.
-	dlg_target = player;
+	dlg_player = player;
 	//var progress = dlg_progress;
 	dlg_progress++;
 	dlg_internal = 0;
@@ -165,12 +166,12 @@ public func ProgressDialogue(object player)
  @author Sven2
  @version 0.1.0
  */
-public func MessageBoxAll(string message, object talker, bool as_message)
+public func MessageBoxAll(string message, object speaker, bool as_message)
 {
 	for(var i = 0; i < GetPlayerCount(C4PT_User); ++i)
 	{
 		var plr = GetPlayerByIndex(i, C4PT_User);
-		MessageBox(message, GetCursor(plr), talker, plr, as_message);
+		MessageBox(message, GetCursor(plr), speaker, plr, as_message);
 	}
 }
 
@@ -179,20 +180,20 @@ public func MessageBoxAll(string message, object talker, bool as_message)
  @author Sven2
  @version 0.1.0
  */
-public func MessageBoxBroadcast(string message, object clonk, object talker, array options)
+public func MessageBoxBroadcast(string message, object player, object speaker, array options)
 {
 	// message copy to other players
 	for(var i = 0; i < GetPlayerCount(C4PT_User); ++i)
 	{
 		var plr = GetPlayerByIndex(i, C4PT_User);
-		if (GetCursor(plr) != clonk)
-			MessageBox(message, GetCursor(plr), talker, plr, true);
+		if (GetCursor(plr) != player)
+			MessageBox(message, GetCursor(plr), speaker, plr, true);
 	}
 	// main message as dialog box
-	return MessageBox(message, clonk, talker, nil, false, options);
+	return MessageBox(message, player, speaker, nil, false, options);
 }
 
-static MessageBox_last_talker, MessageBox_last_pos;
+static MessageBox_last_speaker, MessageBox_last_pos;
 
 
 /**
@@ -200,7 +201,7 @@ static MessageBox_last_talker, MessageBox_last_pos;
  @author Sven2
  @version 0.1.0
  */
-private func MessageBox(string message, object clonk, object talker, int for_player, bool as_message, array options)
+private func MessageBox(string message, object player, object speaker, int for_player, bool as_message, array options)
 {
 	// broadcast enabled: message copy to other players
 	if (dlg_broadcast && !as_message)
@@ -208,38 +209,41 @@ private func MessageBox(string message, object clonk, object talker, int for_pla
 		for(var i = 0; i < GetPlayerCount(C4PT_User); ++i)
 		{
 			var other_plr = GetPlayerByIndex(i, C4PT_User);
-			if (GetCursor(other_plr) != clonk)
-				MessageBox(message, GetCursor(other_plr), talker, other_plr, true);
+			if (GetCursor(other_plr) != player)
+				MessageBox(message, GetCursor(other_plr), speaker, other_plr, true);
 		}
 	}
-	// Use current NPC as talker if unspecified.
-	// On definition call or without talker, just show the message without a source
-	if (!talker && this != Dialogue) talker = dlg_target;
-	if (talker) message = Format("<c %x>%s:</c> %s", talker->GetColor(), talker->GetName(), message);
+	// Use current NPC as speaker if unspecified.
+	// On definition call or without speaker, just show the message without a source
 	var portrait;
-	if (talker) portrait = talker->~GetPortrait();
+	if (!speaker && this != DialogueEx) speaker = dlg_target;
+	if (speaker)
+	{
+		message = Format("<c %x>%s:</c> %s", speaker->GetColor(), speaker->GetName(), message);
+	    portrait = speaker->~GetPortrait();
+	}
 	
-	// A target Clonk is given: Use a menu for this dialogue.
-	if (clonk && !as_message)
+	// A target player is given: Use a menu for this dialogue.
+	if (player && !as_message)
 	{
 		var menu_target, cmd;
-		if (this != Dialogue)
+		if (this != DialogueEx)
 		{
 			menu_target = this;
 			cmd = "MenuOK";
 		}
-		clonk->CreateMenu(Dialogue, menu_target, C4MN_Extra_None, nil, nil, C4MN_Style_Dialog, false, Dialogue);
+		player->CreateMenu(DialogueEx, menu_target, C4MN_Extra_None, nil, nil, C4MN_Style_Dialog, false, DialogueEx);
 		
 		// Add NPC portrait.
-		//var portrait = Format("%i", talker->GetID()); //, Dialogue, talker->GetColor(), "1");
-		if (talker)
+		//var portrait = Format("%i", speaker->GetID()); //, DialogueEx, speaker->GetColor(), "1");
+		if (speaker)
 			if (portrait)
-				clonk->AddMenuItem("", nil, Dialogue, nil, clonk, nil, C4MN_Add_ImgPropListSpec, portrait);
+				player->AddMenuItem("", nil, DialogueEx, nil, player, nil, C4MN_Add_ImgPropListSpec, portrait);
 			else
-				clonk->AddMenuItem("", nil, Dialogue, nil, clonk, nil, C4MN_Add_ImgObject, talker);
+				player->AddMenuItem("", nil, DialogueEx, nil, player, nil, C4MN_Add_ImgObject, speaker);
 
 		// Add NPC message.
-		clonk->AddMenuItem(message, nil, nil, nil, clonk, nil, C4MN_Add_ForceNoDesc);
+		player->AddMenuItem(message, nil, nil, nil, player, nil, C4MN_Add_ForceNoDesc);
 		
 		// Add answers.
 		if (options) for (var option in options)
@@ -255,12 +259,12 @@ private func MessageBox(string message, object clonk, object talker, int for_pla
 					// Command given as section name: Remove leading # and call section change
 					var ichar=1, ocmd = "", c;
 					while (c = GetChar(option_command, ichar++)) ocmd = Format("%s%c", ocmd, c);
-					option_command = Format("CallDialogue(Object(%d), 1, \"%s\")", clonk->ObjectNumber(), ocmd);
+					option_command = Format("CallDialogue(Object(%d), 1, \"%s\")", player->ObjectNumber(), ocmd);
 				}
 				else
 				{
-					// if only a command is given, the standard parameter is just the clonk
-					if (!WildcardMatch(option_command, "*(*")) option_command = Format("%s(Object(%d))", option_command, clonk->ObjectNumber());
+					// if only a command is given, the standard parameter is just the player
+					if (!WildcardMatch(option_command, "*(*")) option_command = Format("%s(Object(%d))", option_command, player->ObjectNumber());
 				}
 			}
 			else
@@ -269,23 +273,23 @@ private func MessageBox(string message, object clonk, object talker, int for_pla
 				option_text = option;
 				option_command = cmd;
 			}
-			clonk->AddMenuItem(option_text, option_command, nil, nil, clonk, nil, C4MN_Add_ForceNoDesc);
+			player->AddMenuItem(option_text, option_command, nil, nil, player, nil, C4MN_Add_ForceNoDesc);
 		}
 		
 		// If there are no answers, add a next entry
-		if (cmd && !options) clonk->AddMenuItem("$Next$", cmd, nil, nil, clonk, nil, C4MN_Add_ForceNoDesc);
+		if (cmd && !options) player->AddMenuItem("$Next$", cmd, nil, nil, player, nil, C4MN_Add_ForceNoDesc);
 		
 		// Set menu decoration.
-		clonk->SetMenuDecoration(GUI_MenuDeco);
+		player->SetMenuDecoration(GUI_MenuDeco);
 		
 		// Set text progress to NPC name.
-		if (talker)
+		if (speaker)
 		{
-			var name = talker->GetName();
+			var name = speaker->GetName();
 			var n_length;
 			while (GetChar(name, n_length))
 				n_length++;
-			clonk->SetMenuTextProgress(n_length + 1);
+			player->SetMenuTextProgress(n_length + 1);
 		}
 	}
 	else
@@ -293,8 +297,8 @@ private func MessageBox(string message, object clonk, object talker, int for_pla
 		// No target is given: Global (player) message
 		if (!GetType(for_player)) for_player = NO_OWNER;
 		// altenate left/right position as speakers change
-		if (talker != MessageBox_last_talker) MessageBox_last_pos = !MessageBox_last_pos;
-		MessageBox_last_talker = talker;
+		if (speaker != MessageBox_last_speaker) MessageBox_last_pos = !MessageBox_last_pos;
+		MessageBox_last_speaker = speaker;
 		var flags = 0, xoff = 150;
 		if (!MessageBox_last_pos)
 		{
@@ -306,7 +310,7 @@ private func MessageBox(string message, object clonk, object talker, int for_pla
 		{
 			CustomMessage("", nil, for_player, 0,0, nil, nil, nil, MSG_Right);  // clear prev msg
 		}
-		CustomMessage(message, nil, for_player, xoff,150, nil, GUI_MenuDeco, portrait ?? talker, flags);
+		CustomMessage(message, nil, for_player, xoff,150, nil, GUI_MenuDeco, portrait ?? speaker, flags);
 	}
 
 	return;
