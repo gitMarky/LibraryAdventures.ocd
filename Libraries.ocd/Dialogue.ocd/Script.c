@@ -1,16 +1,4 @@
-// Sets a new dialogue for a npc.
-global func SetDialogueEx(string name)
-{
-	if (!this)
-		return;
-	var dialogue = CreateObject(Library_Dialogue, 0, 0, NO_OWNER);
-	
-	dialogue->SetObjectLayer(nil);
-	dialogue.Plane = this.Plane+1; // for proper placement of the attention symbol
-	dialogue.dlg_name = name;
 
-	return dialogue;
-}
 
 public func DlgText(string text, object speaker)
 {
@@ -99,7 +87,7 @@ private func InDialogue(object player)
 	    || player->GetMenu() == DialogueEx;
 }
 
-private func StopDialogue(object player)
+private func CloseMessageBox(object player)
 {
 	player->CloseMenu();
 }
@@ -113,11 +101,11 @@ private func StopDialogue(object player)
  @author Sven2
  @version 0.1.0
  */
-public func Interact(object player)
+public func ProgressDialogue(object player)
 {
 	// Currently in a dialogue: abort that dialogue.
 	if (InDialogue(player))
-		StopDialogue(player);	
+		CloseMessageBox(player);	
 	
 	// No conversation context: abort.
 	//if (!dlg_name)
@@ -133,7 +121,7 @@ public func Interact(object player)
 	// Stop dialogue?
 	if (dlg_status == DLG_Status_Stop)
 	{
-		StopDialogue(player);
+		CloseMessageBox(player);
 		dlg_status = DLG_Status_Active;
 		return true;
 	}
@@ -141,7 +129,7 @@ public func Interact(object player)
 	// Remove dialogue?
 	if (dlg_status == DLG_Status_Remove)
 	{
-		StopDialogue(player);
+		CloseMessageBox(player);
 		RemoveObject();
 		return true;		
 	}
@@ -156,7 +144,7 @@ public func Interact(object player)
 	// Start conversation context.
 	// Update dialogue progress first.
 	dlg_target = player;
-	var progress = dlg_progress;
+	//var progress = dlg_progress;
 	dlg_progress++;
 	dlg_internal = 0;
 	// Then call relevant functions.
@@ -170,14 +158,6 @@ public func Interact(object player)
 	var fn_generic = Format("Dlg_%s", dlg_name);
 	Call(fn_generic, player);
 	return true;
-}
-
-
-public func MenuOK(proplist menu_id, object clonk)
-{
-	// prevent the menu from closing when pressing MenuOK
-	if (dlg_interact)
-		Interact(clonk);
 }
 
 //------------------------------------------------------------------------

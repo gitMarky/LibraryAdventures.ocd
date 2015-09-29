@@ -3,28 +3,26 @@
 
 	@title Dialogue
 	@author Marky
+	@credits Sven2 for the original dialogue object that this code is based on.
+    @version 0.1.0
 */
 
-
-local dlg_target;
-local dlg_name;
-local dlg_info;
-local dlg_progress;
-local dlg_section;   // if set, this string is included in progress callbacks (i.e., func Dlg_[Name]_[Section][Progress]() is called)
-local dlg_status;
-local dlg_interact;  // default true. can be set to false to deactivate the dialogue
-local dlg_attention; // if set, a red attention mark is put above the clonk
-local dlg_broadcast; // if set, all non-message (i.e. menu) MessageBox calls are called as MessageBoxBroadcast.
-
+#include Library_Dialogue
 
 /*-- Dialogue creation --*/
 
-// Sets a new dialogue for a npc.
-global func SetDialogue(string name, bool attention)
+/**
+ Sets a new dialogue for a npc.
+ @par name The dialogue name. // TODO
+ @par attention If set to true, then this dialogue will 
+                have an attention marker displayed initially.
+ @version 0.1.0
+ */
+global func SetDialogueEx(string name, bool attention)
 {
 	if (!this)
 		return;
-	var dialogue = CreateObjectAbove(Dialogue);
+	var dialogue = CreateObject(DialogueEx, 0, 0, NO_OWNER);
 	dialogue->InitDialogue(name, this, attention);
 	
 	dialogue->SetObjectLayer(nil);
@@ -33,15 +31,22 @@ global func SetDialogue(string name, bool attention)
 	return dialogue;
 }
 
-// Removes the existing dialogue of an object.
-global func RemoveDialogue()
+/**
+ Removes the existing dialogue of an object.
+ @version 0.1.0
+ */
+global func RemoveDialogueEx()
 {
-	var dialogue = Dialogue->FindByTarget(this);
+	var dialogue = DialogueEx->FindByTarget(this);
 	if (dialogue) return dialogue->RemoveObject();
 	return false;
 }
 
-// Find dialogue attached to a target (definition call, e.g. var dlg = Dialogue->FindByTarget(foo))
+/**
+  Find dialogue attached to a target (definition call, e.g. var dlg = DialogueEx->FindByTarget(foo))
+  @par target The object or NPC that starts the dialogue.
+  @version 0.1.0
+  */
 func FindByTarget(object target)
 {
 	if (!target) return nil;
@@ -53,17 +58,16 @@ func FindByTarget(object target)
 protected func Initialize()
 {
 	// Dialogue progress to one.
-	dlg_progress = 1;
+	_inherited(...);
 	// Dialogue allows interaction by default.
-	dlg_interact = true;
+	dlg_interact = true; // TODO: Replace with method calls
 	// Dialogue is active by default.
-	dlg_status = DLG_Status_Active;
-	return;
+	dlg_status = DLG_Status_Active; // TODO: Replace with method calls.
 }
 
 public func InitDialogue(string name, object target, bool attention)
 {
-	dlg_target = target;
+	dlg_target = target; // TODO: Replace with method calls
 	dlg_name = name;
 
 	// Attach dialogue object to target.
@@ -84,7 +88,7 @@ public func InitDialogue(string name, object target, bool attention)
 	
 	// Effect on targets to remove the dialogue when target dies or is removed
 	AddEffect("IntDialogue", target, 1, 0, this);
-	
+
 	// Custom dialogue initialization
 	if (!Call(Format("~Dlg_%s_Init", dlg_name), dlg_target))
 		GameCall(Format("~Dlg_%s_Init", dlg_name), this, dlg_target);
@@ -99,6 +103,10 @@ private func FxIntDialogueStop(object target, proplist fx, int reason, bool temp
 	return FX_OK;
 }
 
+/**
+ Adds an attention marker to this dialogue.
+ @version 0.1.0
+ */
 public func AddAttention()
 {
 	// Attention: Show exclamation mark and glitter effect every five seconds
@@ -108,9 +116,13 @@ public func AddAttention()
 		RemoveTimer("AttentionEffect"); AddTimer("AttentionEffect", 36*5);
 		dlg_attention = true;
 	}
-	return true;
+	return true; // TODO: remove return value?
 }
 
+/**
+ Removes an existing attention marker from this dialogue.
+ @version 0.1.0
+ */
 public func RemoveAttention()
 {
 	// No longer show exclamation mark and glitter effects
@@ -120,10 +132,13 @@ public func RemoveAttention()
 		if (dlg_target) SetAction("Dialogue", dlg_target);
 		dlg_attention = false;
 	}
-	return true;
+	return true; // TODO: Remove return value
 }
 
-private func AttentionEffect() { return SetAction("DialogueAttentionEffect", dlg_target); }
+private func AttentionEffect()
+{
+	return SetAction("DialogueAttentionEffect", dlg_target);
+}
 
 private func UpdateDialogue()
 {
@@ -135,42 +150,52 @@ private func UpdateDialogue()
 	SetShape(-wdt/2, -hgt/2, wdt, hgt);
 	// Transfer target name.
 	//SetName(Format("$MsgSpeak$", dlg_target->GetName()));
-	return;
 }
 
 public func SetDialogueInfo()
 {
-
-	return;
+	// does nothing?
 }
 
+/**
+ Sets the possibility to call this dialogue with the
+ object interaction interface.
+ @par allow If set to {@c true}, then the dialogue can be called
+            by interaction.
+ @version 0.1.0
+ */
 public func SetInteraction(bool allow)
 {
 	dlg_interact = allow;
-	return;
 }
 
+/**
+ Sets the dialogue progress.
+ @int progress //TODO
+ @version 0.1.0
+ */
 public func SetDialogueProgress(int progress, string section, bool add_attention)
 {
 	dlg_progress = Max(1, progress);
 	dlg_section = section;
 	if (add_attention) AddAttention();
-	return;
 }
 
 public func SetDialogueStatus(int status)
 {
 	dlg_status = status;
-	return;
 }
 
-// to be called from within dialogue after the last message
+/**
+ To be called from within dialogue after the last message.
+ @version 0.1.0
+ */
 public func StopDialogue()
 {
 	// put on wait for a while; then reenable
 	SetDialogueStatus(DLG_Status_Wait);
 	ScheduleCall(this, this.SetDialogueStatus, 30, 1, DLG_Status_Stop);
-	return true;
+	return true; // TODO: remove return value?
 }
 
 /*-- Interaction --*/
@@ -253,160 +278,12 @@ public func Interact(object clonk)
 	return true;
 }
 
-private func InDialogue(object clonk)
-{
-	return clonk->GetMenu() == Dialogue;
-}
-
-public func MessageBoxAll(string message, object talker, bool as_message)
-{
-	for(var i = 0; i < GetPlayerCount(C4PT_User); ++i)
-	{
-		var plr = GetPlayerByIndex(i, C4PT_User);
-		MessageBox(message, GetCursor(plr), talker, plr, as_message);
-	}
-}
-
-// Message box as dialog to player with a message copy to all other players
-public func MessageBoxBroadcast(string message, object clonk, object talker, array options)
-{
-	// message copy to other players
-	for(var i = 0; i < GetPlayerCount(C4PT_User); ++i)
-	{
-		var plr = GetPlayerByIndex(i, C4PT_User);
-		if (GetCursor(plr) != clonk)
-			MessageBox(message, GetCursor(plr), talker, plr, true);
-	}
-	// main message as dialog box
-	return MessageBox(message, clonk, talker, nil, false, options);
-}
-
-static MessageBox_last_talker, MessageBox_last_pos;
-
-private func MessageBox(string message, object clonk, object talker, int for_player, bool as_message, array options)
-{
-	// broadcast enabled: message copy to other players
-	if (dlg_broadcast && !as_message)
-	{
-		for(var i = 0; i < GetPlayerCount(C4PT_User); ++i)
-		{
-			var other_plr = GetPlayerByIndex(i, C4PT_User);
-			if (GetCursor(other_plr) != clonk)
-				MessageBox(message, GetCursor(other_plr), talker, other_plr, true);
-		}
-	}
-	// Use current NPC as talker if unspecified.
-	// On definition call or without talker, just show the message without a source
-	if (!talker && this != Dialogue) talker = dlg_target;
-	if (talker) message = Format("<c %x>%s:</c> %s", talker->GetColor(), talker->GetName(), message);
-	var portrait;
-	if (talker) portrait = talker->~GetPortrait();
-	
-	// A target Clonk is given: Use a menu for this dialogue.
-	if (clonk && !as_message)
-	{
-		var menu_target, cmd;
-		if (this != Dialogue)
-		{
-			menu_target = this;
-			cmd = "MenuOK";
-		}
-		clonk->CreateMenu(Dialogue, menu_target, C4MN_Extra_None, nil, nil, C4MN_Style_Dialog, false, Dialogue);
-		
-		// Add NPC portrait.
-		//var portrait = Format("%i", talker->GetID()); //, Dialogue, talker->GetColor(), "1");
-		if (talker)
-			if (portrait)
-				clonk->AddMenuItem("", nil, Dialogue, nil, clonk, nil, C4MN_Add_ImgPropListSpec, portrait);
-			else
-				clonk->AddMenuItem("", nil, Dialogue, nil, clonk, nil, C4MN_Add_ImgObject, talker);
-
-		// Add NPC message.
-		clonk->AddMenuItem(message, nil, nil, nil, clonk, nil, C4MN_Add_ForceNoDesc);
-		
-		// Add answers.
-		if (options) for (var option in options)
-		{
-			var option_text, option_command;
-			if (GetType(option) == C4V_Array)
-			{
-				// Text+Command given
-				option_text = option[0];
-				option_command = option[1];
-				if (GetChar(option_command) == GetChar("#"))
-				{
-					// Command given as section name: Remove leading # and call section change
-					var ichar=1, ocmd = "", c;
-					while (c = GetChar(option_command, ichar++)) ocmd = Format("%s%c", ocmd, c);
-					option_command = Format("CallDialogue(Object(%d), 1, \"%s\")", clonk->ObjectNumber(), ocmd);
-				}
-				else
-				{
-					// if only a command is given, the standard parameter is just the clonk
-					if (!WildcardMatch(option_command, "*(*")) option_command = Format("%s(Object(%d))", option_command, clonk->ObjectNumber());
-				}
-			}
-			else
-			{
-				// Only text given - command means regular dialogue advance
-				option_text = option;
-				option_command = cmd;
-			}
-			clonk->AddMenuItem(option_text, option_command, nil, nil, clonk, nil, C4MN_Add_ForceNoDesc);
-		}
-		
-		// If there are no answers, add a next entry
-		if (cmd && !options) clonk->AddMenuItem("$Next$", cmd, nil, nil, clonk, nil, C4MN_Add_ForceNoDesc);
-		
-		// Set menu decoration.
-		clonk->SetMenuDecoration(GUI_MenuDeco);
-		
-		// Set text progress to NPC name.
-		if (talker)
-		{
-			var name = talker->GetName();
-			var n_length;
-			while (GetChar(name, n_length))
-				n_length++;
-			clonk->SetMenuTextProgress(n_length + 1);
-		}
-	}
-	else
-	{
-		// No target is given: Global (player) message
-		if (!GetType(for_player)) for_player = NO_OWNER;
-		// altenate left/right position as speakers change
-		if (talker != MessageBox_last_talker) MessageBox_last_pos = !MessageBox_last_pos;
-		MessageBox_last_talker = talker;
-		var flags = 0, xoff = 150;
-		if (!MessageBox_last_pos)
-		{
-			flags = MSG_Right;
-			xoff *= -1;
-			CustomMessage("", nil, for_player); // clear prev msg
-		}
-		else
-		{
-			CustomMessage("", nil, for_player, 0,0, nil, nil, nil, MSG_Right);  // clear prev msg
-		}
-		CustomMessage(message, nil, for_player, xoff,150, nil, GUI_MenuDeco, portrait ?? talker, flags);
-	}
-
-	return;
-}
 
 public func MenuOK(proplist menu_id, object clonk)
 {
 	// prevent the menu from closing when pressing MenuOK
 	if (dlg_interact)
 		Interact(clonk);
-}
-
-// Enable or disable message broadcasting to all players for important dialogues
-public func SetBroadcast(bool to_val)
-{
-	dlg_broadcast = to_val;
-	return true;
 }
 
 public func SetSpeakerDirs(object speaker1, object speaker2)
@@ -434,8 +311,6 @@ func SaveScenarioObject(props)
 	while (obj = dlg_target->Contents(i++)) obj->MakeScenarioSaveName();
 	return true;
 }
-
-
 
 
 /* Properties */
@@ -476,4 +351,5 @@ local ActMap = {
 		NextAction = "DialogueAttention",
 	}
 };
+
 local Name = "$Name$";
