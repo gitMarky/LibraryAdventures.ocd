@@ -227,53 +227,43 @@ public func Interact(object clonk)
 		return true;	
 	
 	// Currently in a dialogue: abort that dialogue.
-	if (InDialogue(clonk))
-		clonk->CloseMenu();	
+	//if (InDialogue(clonk))
+	//	clonk->CloseMenu();	
 	
 	// No conversation context: abort.
-	if (!dlg_name)
-		return true;
+	//if (!dlg_name)
+	//	return true;
 		
 	// Dialogue still waiting? Do nothing then
 	// (A sound might be nice here)
-	if (dlg_status == DLG_Status_Wait)
-	{
-		return true;
-	}
+	//if (dlg_status == DLG_Status_Wait)
+	//{
+	//	return true;
+	//}
 		
 	// Stop dialogue?
-	if (dlg_status == DLG_Status_Stop)
-	{
-		clonk->CloseMenu();
-		dlg_status = DLG_Status_Active;
-		return true;
-	}
+	//if (dlg_status == DLG_Status_Stop)
+	//{
+	//	clonk->CloseMenu();
+	//	dlg_status = DLG_Status_Active;
+	//	return true;
+	//}
 	// Remove dialogue?
-	if (dlg_status == DLG_Status_Remove)
-	{
-		clonk->CloseMenu();
-		RemoveObject();
-		return true;		
-	}
-	
-	// Remove attention mark on first interaction
-	RemoveAttention();
-	
-	// Have speakers face each other
-	SetSpeakerDirs(dlg_target, clonk);
+	//if (dlg_status == DLG_Status_Remove)
+	//{
+	//	clonk->CloseMenu();
+	//	RemoveObject();
+	//	return true;		
+	//}
 
-	// Start conversation context.
-	// Update dialogue progress first.
-	var progress = dlg_progress;
-	dlg_progress++;
-	// Then call relevant functions.
-	// Call generic function first, then progress function
-	var fn_generic = Format("~Dlg_%s", dlg_name);
-	var fn_progress = Format("~Dlg_%s_%s%d", dlg_name, dlg_section ?? "", progress);
-	if (!Call(fn_generic, clonk))
-		if (!GameCall(fn_generic, this, clonk, dlg_target))
-			if (!Call(fn_progress, clonk))
-				GameCall(fn_progress, this, clonk, dlg_target);
+	if (ProgressDialogue(clonk))
+	{	
+		// Remove attention mark on first interaction
+		RemoveAttention();
+		
+		// Have speakers face each other
+		SetSpeakerDirs(dlg_target, clonk);
+	}
 
 	return true;
 }

@@ -45,7 +45,7 @@ public func DlgOptionEnd()
 	++dlg_internal;
 }
 
-global func DlgEvent()
+public func DlgEvent()
 {
 	// TODO
 	// not sure if this is necessary
@@ -115,7 +115,7 @@ public func ProgressDialogue(object player)
 	// (A sound might be nice here)
 	if (dlg_status == DLG_Status_Wait)
 	{
-		return true;
+		return false;
 	}
 		
 	// Stop dialogue?
@@ -123,7 +123,7 @@ public func ProgressDialogue(object player)
 	{
 		CloseMessageBox(player);
 		dlg_status = DLG_Status_Active;
-		return true;
+		return false;
 	}
 
 	// Remove dialogue?
@@ -131,7 +131,7 @@ public func ProgressDialogue(object player)
 	{
 		CloseMessageBox(player);
 		RemoveObject();
-		return true;		
+		return false;		
 	}
 	
 	// Remove attention mark on first interaction
