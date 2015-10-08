@@ -49,6 +49,13 @@ public func DlgEvent()
 {
 	// TODO
 	// not sure if this is necessary
+	var execute_event = false;
+	if (dlg_internal == dlg_progress)
+	{
+		execute_event = true;
+	}
+	++dlg_internal;
+	return execute_event;
 }
 
 //-------------------------------------------------------------------------
