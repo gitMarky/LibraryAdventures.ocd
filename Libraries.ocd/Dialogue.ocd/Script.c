@@ -25,7 +25,7 @@ public func DlgOption(string text)
 
 public func DlgReset()
 {
-	// TODO
+	Log("Progress is %d, resetting number is %d", dlg_progress, dlg_internal);
 	if (dlg_internal == dlg_progress)
 	{
 		ResetDialogue();
@@ -45,15 +45,29 @@ public func DlgOptionEnd()
 	++dlg_internal;
 }
 
-public func DlgEvent()
+/**
+ Adds an event to the dialogue.
+ @return Returns true, if the dialogue event should be performed.
+ @example This dialogue gives a cookie to the player every time that it is called.
+ {@code
+     Dlg_Cookie(object player)
+     {
+         DlgText("Here, have a cookie!"); // displays the message
+         if (DlgEvent()) // is called after the message is displayed
+         {
+             player->CreateContents(Cookie); // gives the cookie to the player
+         }
+     }
+ } 
+ */
+public func DlgEvent(int delay)
 {
-	// TODO
-	// not sure if this is necessary
 	var execute_event = false;
 	if (dlg_internal == dlg_progress)
 	{
 		execute_event = true;
-	}
+		ScheduleCall(this, "ProgressDialogue", 1, nil, dlg_player);
+	} // progress should be increased too
 	++dlg_internal;
 	return execute_event;
 }
@@ -161,6 +175,13 @@ public func ProgressDialogue(object player)
 	//			GameCall(fn_progress, this, player, dlg_target);
 	var fn_generic = Format("Dlg_%s", dlg_name);
 	Call(fn_generic, player);
+	
+	Log("--> After dialogue: progress %d, internal %d", dlg_progress, dlg_internal);
+	if (dlg_progress >= dlg_internal)
+	{
+		ResetDialogue();
+	}
+	
 	return true;
 }
 
