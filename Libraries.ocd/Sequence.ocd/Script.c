@@ -65,7 +65,7 @@ public func Start(string name, progress, ...)
 
 	// Store sequence name and progress.
 	this.seq_name = name;
-	this.seq_progress = progress;
+	SetProgress(progress);
 
 	SequenceCall("Init");	// Call init function of this scene - difference to start function is that it is called before any player joins.
 	JoinPlayers();
@@ -149,18 +149,17 @@ public func ScheduleNext(int delay, next_progress)
 	return ScheduleCall(this, this.CallNext, delay, 0, next_progress);
 }
 
-public func ScheduleSame(int delay) { return ScheduleNext(delay, seq_progress); }
+public func ScheduleSame(int delay) { return ScheduleNext(delay, GetProgress()); }
 
 public func CallNext(next_progress)
 {
-	// Start conversation context.
-	// Update dialogue progress first.
-	if (GetType(next_progress)) 
-		seq_progress = next_progress; 
+	// Update progress first.
+	if (GetType(next_progress) == C4V_String)
+		SetProgress(next_progress); 
 	else 
-		++seq_progress;
+		SetProgress(seq_progress + 1);
 	// Then call relevant functions.
-	SequenceCall(seq_progress);
+	SequenceCall(GetProgress());
 	return true;
 }
 
