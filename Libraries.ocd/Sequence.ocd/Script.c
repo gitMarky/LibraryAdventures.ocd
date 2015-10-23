@@ -92,9 +92,9 @@ public func Stop(bool remove)
 	{
 		for (var i = 0; i<GetPlayerCount(C4PT_User); ++i)
 		{
-			var plr = GetPlayerByIndex(i, C4PT_User);
+			var player = GetPlayerByIndex(i, C4PT_User);
 			// Per-player sequence callback.
-			RemovePlayer(plr);
+			RemovePlayer(player);
 		}
 		started = false;
 		// Call stop function of this scene.
@@ -117,46 +117,46 @@ func JoinPlayers()
 	// Join all players: disable player controls and call join player of this scene.
 	for (var i = 0; i < GetPlayerCount(C4PT_User); ++i)
 	{
-		var plr = GetPlayerByIndex(i, C4PT_User);
-		JoinPlayer(plr);
+		var player = GetPlayerByIndex(i, C4PT_User);
+		JoinPlayer(player);
 	}
 }
 
-protected func InitializePlayer(int plr)
+protected func InitializePlayer(int player)
 {
-	JoinPlayer(plr);
+	JoinPlayer(player);
 	return true;
 }
 
-public func RemovePlayer(int plr)
+public func RemovePlayer(int player)
 {
 	// Called by sequence if it ends and by engine if player leaves.
-	SequenceCall("RemovePlayer", plr);
+	SequenceCall("RemovePlayer", player);
 	return true;
 }
 
-public func JoinPlayer(int plr)
+public func JoinPlayer(int player)
 {
 	// Per-player sequence callback.
-	SequenceCall("JoinPlayer", plr);
+	SequenceCall("JoinPlayer", player);
 	return true;
 }
 
 /*-- Sequence callbacks --*/
 
-public func ScheduleNext(int delay, next_idx)
+public func ScheduleNext(int delay, next_progress)
 {
-	return ScheduleCall(this, this.CallNext, delay, 0, next_idx);
+	return ScheduleCall(this, this.CallNext, delay, 0, next_progress);
 }
 
 public func ScheduleSame(int delay) { return ScheduleNext(delay, seq_progress); }
 
-public func CallNext(next_idx)
+public func CallNext(next_progress)
 {
 	// Start conversation context.
 	// Update dialogue progress first.
-	if (GetType(next_idx)) 
-		seq_progress = next_idx; 
+	if (GetType(next_progress)) 
+		seq_progress = next_progress; 
 	else 
 		++seq_progress;
 	// Then call relevant functions.
@@ -175,20 +175,20 @@ public func SaveScenarioObject(props) { return false; }
 // Starts the specified sequence at indicated progress.
 global func StartBackgroundSequence(string name, progress, ...)
 {
-	var seq = CreateObject(BackgroundSequence, 0, 0, NO_OWNER);
-	seq->Start(name, progress, ...);
-	return seq;
+	var sequence = CreateObject(BackgroundSequence, 0, 0, NO_OWNER);
+	sequence->Start(name, progress, ...);
+	return sequence;
 }
 
 // Stops the currently active sequence.
 global func StopBackgroundSequence(string name)
 {
-	var seq = FindObject(Find_ID(BackgroundSequence), Find_Func("IsBackgroundSequence", name));
-	if (!seq) 
+	var sequence = FindObject(Find_ID(BackgroundSequence), Find_Func("IsBackgroundSequence", name));
+	if (!sequence) 
 		return false;
-	if (seq->IsActive())
+	if (sequence->IsActive())
 	{
-		return seq->Stop();
+		return sequence->Stop();
 	}
 	else
 	{
@@ -199,6 +199,6 @@ global func StopBackgroundSequence(string name)
 // Returns background sequences with certain criteria.
 global func GetBackgroundSequences(...)
 {
-	var seq = FindObjects(Find_ID(BackgroundSequence), ...);
-	return seq;
+	var sequences = FindObjects(Find_ID(BackgroundSequence), ...);
+	return sequences;
 }
