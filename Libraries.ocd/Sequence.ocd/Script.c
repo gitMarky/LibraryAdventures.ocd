@@ -154,7 +154,7 @@ public func ScheduleSame(int delay) { return ScheduleNext(delay, GetProgress());
 public func CallNext(next_progress)
 {
 	// Update progress first.
-	if (GetType(next_progress) == C4V_String)
+	if (GetType(next_progress))
 		SetProgress(next_progress); 
 	else 
 		SetProgress(seq_progress + 1);
