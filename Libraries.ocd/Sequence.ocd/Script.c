@@ -65,6 +65,7 @@ public func Start(string name, progress, ...)
 
 	// Store sequence name and progress.
 	this.seq_name = name;
+	if (!progress) progress = 0;
 	SetProgress(progress);
 
 	SequenceCall("Init");	// Call init function of this scene - difference to start function is that it is called before any player joins.
@@ -76,7 +77,7 @@ public func Start(string name, progress, ...)
 
 func SequenceCall(string name, ...)
 {
-	var fn_name = Format("%s_%s", seq_name, name);
+	var fn_name = Format("~%s_%s", seq_name, name);
 	if (!Call(fn_name, ...))
 		GameCall(fn_name, this, ...);
 }
