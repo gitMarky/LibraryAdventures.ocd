@@ -2,7 +2,7 @@
 
 public func DlgText(string text, object speaker)
 {
-	Log("Progress is %d, visiting %d (%s)", dlg_progress, dlg_internal, text);
+	//Log("Progress is %d, visiting %d (%s)", dlg_progress, dlg_internal, text);
 	// TODO
 	if (dlg_internal == dlg_progress)
 	{
@@ -25,7 +25,7 @@ public func DlgOption(string text)
 
 public func DlgReset()
 {
-	Log("Progress is %d, resetting number is %d", dlg_progress, dlg_internal);
+	//Log("Progress is %d, resetting number is %d", dlg_progress, dlg_internal);
 	if (dlg_internal == dlg_progress)
 	{
 		ResetDialogue();
@@ -176,7 +176,7 @@ public func ProgressDialogue(object player)
 	var fn_generic = Format("Dlg_%s", dlg_name);
 	Call(fn_generic, player);
 	
-	Log("--> After dialogue: progress %d, internal %d", dlg_progress, dlg_internal);
+	//Log("--> After dialogue: progress %d, internal %d", dlg_progress, dlg_internal);
 	if (dlg_progress >= dlg_internal)
 	{
 		ResetDialogue();
