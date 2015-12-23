@@ -29,11 +29,20 @@ public func SetProgress(progress)
 	}
 
 	seq_progress = progress;
+	
+//	Log("Sequence Progress: %v %v", seq_progress, GetType(seq_progress));
 }
 
 public func GetProgress()
 {
-	return seq_progress;
+	if (GetType(seq_progress) == C4V_Int)
+	{
+		return Format("%d", seq_progress);
+	}
+	else
+	{
+		return seq_progress;
+	}
 }
 
 public func IsBackgroundSequence(string name)
@@ -68,10 +77,10 @@ public func Start(string name, progress, ...)
 	if (!progress) progress = 0;
 	SetProgress(progress);
 
-	SequenceCall("Init");	// Call init function of this scene - difference to start function is that it is called before any player joins.
+	SequenceCall("Init", ...);	// Call init function of this scene - difference to start function is that it is called before any player joins.
 	JoinPlayers();
 	started = true;
-	SequenceCall("Start"); 	// Call start function of this scene.
+	SequenceCall("Start", ...); 	// Call start function of this scene.
 	return true;
 }
 
