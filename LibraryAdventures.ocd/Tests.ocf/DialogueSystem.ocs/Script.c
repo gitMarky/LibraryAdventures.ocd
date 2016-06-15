@@ -77,6 +77,16 @@ global func Test()
 	return effect;
 }
 
+global func SetTestDefaults()
+{
+	Test().opened_menu = false;
+	Test().opened_menu_counter = 0;
+	Test().closed_menu = false;
+	Test().closed_menu_counter = 0;
+	Test().max_internal = -1;
+	if (Test().dialogue) Test().dialogue->RemoveObject();
+}
+
 /*-- Test Effect --*/
 
 global func FxIntTestControlStart(object target, proplist effect, int temporary)
@@ -96,6 +106,7 @@ global func FxIntTestControlTimer(object target, proplist effect)
 		// Log test start.
 		Log("=====================================");
 		Log("Test %d started:", effect.test_number);
+		SetTestDefaults();
 		// Start the test if available, otherwise finish test sequence.
 		if (!Call(Format("~Test%d_OnStart", effect.test_number)))
 		{
@@ -158,6 +169,61 @@ global func doTest(string message, actual, expected)
 // --------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------
 
+global func MenuWasOpened()
+{
+	if (Test().opened_menu || Test().user->GetMenu())
+	{
+		if (!Test().opened_menu)
+		{
+			pass("Opened menu.");
+			Test().opened_menu = true;
+		}
+		
+		return true;
+	}
+
+
+	Test().opened_menu_counter += 1;
+	
+	if (Test().opened_menu_counter >= 60)
+	{
+		fail("Failed to open the menu.");
+		FailTest();
+	}
+	
+	return false;
+}
+
+
+global func MenuWasClosed()
+{
+	if (Test().opened_menu)
+	{
+		if (!Test().user->GetMenu()) Test().closed_menu_counter += 1;
+
+		if (Test().closed_menu_counter >= 10)
+		{
+			pass("Closed menu.");
+			return true;
+		}
+	}
+
+	return false;
+}
+
+global func CountDialogueProgress()
+{
+	Test().max_internal = Max(Test().max_internal, Test().dialogue.dlg_internal);
+}
+
+global func GetDialogueProgress()
+{
+	return Test().max_internal;
+}
+
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+
 global func Test1_OnStart()
 {
 	Log("Test for DlgText(): Single call of the function");
@@ -170,39 +236,27 @@ global func Test1_OnStart()
 
 global func Test1_Completed()
 {
-	if (Test().user->GetMenu())
+	CountDialogueProgress();
+	
+	if (MenuWasOpened() && MenuWasClosed())
 	{
-		if (!Test().test1_displayed_menu)
+		if (doTest("Test should have displayed 1 entry. Internal dialogue counter was %d, expected %d.", GetDialogueProgress(), 1))
 		{
-			pass("Opened menu.");
-			Test().test1_displayed_menu = true;
+			return true;
+		}
+		else
+		{
+			FailTest();
 			return false;
 		}
 	}
 	else
 	{
-		if (Test().test1_displayed_menu)
-		{
-			pass("Closed menu.");
-			return true;
-		}
-		
-		Test().test1_counter += 1;
-		
-		if (Test().test1_counter >= 60)
-		{
-			fail("Failed to open the menu.");
-			FailTest();
-		}
-	
 		return false;
 	}
 }
 
-global func Test1_OnFinished()
-{
-	if (Test().dialogue) Test().dialogue->RemoveObject();
-}
+global func Test1_OnFinished(){}
 
 // --------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------
@@ -219,46 +273,24 @@ global func Test2_OnStart()
 
 global func Test2_Completed()
 {
-	Test().test2_max_internal = Max(Test().test2_max_internal, Test().dialogue.dlg_internal);
-
-	if (Test().user->GetMenu())
+	CountDialogueProgress();
+	
+	if (MenuWasOpened() && MenuWasClosed())
 	{
-		if (!Test().test2_displayed_menu)
+		if (doTest("Test should have displayed 2 entries. Internal dialogue counter was %d, expected %d.", GetDialogueProgress(), 2))
 		{
-			pass("Opened menu.");
-			Test().test2_displayed_menu = true;
+			return true;
+		}
+		else
+		{
+			FailTest();
 			return false;
 		}
 	}
 	else
 	{
-		if (Test().test2_displayed_menu)
-		{
-			pass("Closed menu.");
-			if (doTest("Test should have displayed 2 entries. Internal dialogue counter was %d, expected %d.", Test().test2_max_internal, 2))
-			{
-				return true;
-			}
-			else
-			{
-				FailTest();
-				return false;
-			}
-		}
-		
-		Test().test2_counter += 1;
-		
-		if (Test().test2_counter >= 60)
-		{
-			fail("Failed to open the menu.");
-			FailTest();
-		}
-	
 		return false;
 	}
 }
 
-global func Test2_OnFinished()
-{
-	if (Test().dialogue) Test().dialogue->RemoveObject();
-}
+global func Test2_OnFinished(){}
