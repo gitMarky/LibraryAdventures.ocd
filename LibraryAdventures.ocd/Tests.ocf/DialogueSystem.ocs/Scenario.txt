@@ -1,0 +1,10 @@
+[Head]
+Title=Dialogue System
+
+[Definitions]
+Definition1=Objects.ocd
+Definition2=LibraryAdventures.ocd
+
+
+[Landscape]
+NoScan=1

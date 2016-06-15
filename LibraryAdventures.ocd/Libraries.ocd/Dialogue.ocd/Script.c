@@ -1,5 +1,16 @@
 
 
+/**
+ * Displays text.
+ * If multiple calls to this function are executed in a row, then
+ * the text should be output in several message boxes, where the user
+ * has to confirm each of the messages individually.
+ *
+ * @par text this text will be displayed.
+ * @par speaker the portrait of this object will be displayed. 
+                By default this is the object that the user is
+                speaking to.
+ */
 public func DlgText(string text, object speaker)
 {
 	//Log("Progress is %d, visiting %d (%s)", dlg_progress, dlg_internal, text);
@@ -66,7 +77,7 @@ public func DlgEvent(int delay)
 	if (dlg_internal == dlg_progress)
 	{
 		execute_event = true;
-		ScheduleCall(this, "ProgressDialogue", 1, nil, dlg_player);
+		ScheduleCall(this, this.ProgressDialogue, 1, nil, dlg_player);
 	} // progress should be increased too
 	++dlg_internal;
 	return execute_event;
@@ -336,9 +347,9 @@ private func MessageBox(string message, object player, object speaker, int for_p
 		}
 		else
 		{
-			CustomMessage("", nil, for_player, 0,0, nil, nil, nil, MSG_Right);  // clear prev msg
+			CustomMessage("", nil, for_player, 0, 0, nil, nil, nil, MSG_Right);  // clear prev msg
 		}
-		CustomMessage(message, nil, for_player, xoff,150, nil, GUI_MenuDeco, portrait ?? speaker, flags);
+		CustomMessage(message, nil, for_player, xoff, 150, nil, GUI_MenuDeco, portrait ?? speaker, flags);
 	}
 
 	return;
