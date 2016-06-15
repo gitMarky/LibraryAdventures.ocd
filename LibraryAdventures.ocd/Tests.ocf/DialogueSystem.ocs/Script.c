@@ -163,6 +163,11 @@ global func doTest(string message, actual, expected)
 	return passed;
 }
 
+global func askUser(string message)
+{
+	return false;
+}
+
 /*-- The actual tests --*/
 
 
@@ -263,7 +268,7 @@ global func Test1_OnFinished(){}
 
 global func Test2_OnStart()
 {
-	Log("Test for DlgText(): Single call of the function");
+	Log("Test for DlgText(): Two calls of the function in a row");
 
 	Test().dialogue = Test().target->SetDialogueEx("TestDlgText2");
 	Test().dialogue->Interact(Test().user);
@@ -294,3 +299,41 @@ global func Test2_Completed()
 }
 
 global func Test2_OnFinished(){}
+
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+
+global func Test3_OnStart()
+{
+	Log("Test for DlgText(): Changing portraits");
+
+	Test().dialogue = Test().target->SetDialogueEx("TestDlgText3");
+	Test().dialogue->Interact(Test().user);
+
+	return true;
+}
+
+global func Test3_Completed()
+{
+	CountDialogueProgress();
+	
+	if (MenuWasOpened() && MenuWasClosed())
+	{
+		if (doTest("Test should have displayed 2 entries. Internal dialogue counter was %d, expected %d.", GetDialogueProgress(), 2)
+		 && askUser("Did the portrait change in the second message?"))
+		{
+			return true;
+		}
+		else
+		{
+			FailTest();
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+
+global func Test3_OnFinished(){}

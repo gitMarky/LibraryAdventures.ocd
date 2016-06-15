@@ -12,7 +12,7 @@ func Dlg_TestDlgText2(object player)
 	DlgText("Output 2.");
 }
 
-func Dlg_TextDlgText3(object player)
+func Dlg_TestDlgText3(object player)
 {
 	DlgText("Output with portrait of the user.", player);
 	DlgText("Output with portrait of the target.", dlg_target);
