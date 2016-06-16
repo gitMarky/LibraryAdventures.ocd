@@ -17,7 +17,7 @@ public func DlgText(string text, object speaker)
 	// TODO
 	if (dlg_internal == dlg_progress)
 	{
-		BroadcastDialogue(text, dlg_player, speaker);
+		BroadcastDialogue(text, dlg_player, speaker ?? dlg_target);
 	}
 	++dlg_internal;
 }

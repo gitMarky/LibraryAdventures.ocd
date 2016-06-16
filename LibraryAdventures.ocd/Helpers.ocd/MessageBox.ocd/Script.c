@@ -85,7 +85,6 @@ private func MessageBox(string message, object player, object speaker, int for_p
 	// Use current NPC as speaker if unspecified.
 	// On definition call or without speaker, just show the message without a source
 	var portrait;
-	if (!speaker && this != DialogueEx) speaker = this; //dlg_target;
 	if (speaker)
 	{
 		message = Format("<c %x>%s:</c> %s", speaker->GetColor(), speaker->GetName(), message);
