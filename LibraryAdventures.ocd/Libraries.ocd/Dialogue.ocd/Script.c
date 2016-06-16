@@ -1,5 +1,4 @@
 
-
 /**
  Displays text.
  If multiple calls to this function are executed in a row, then
@@ -14,10 +13,10 @@
 public func DlgText(string text, object speaker)
 {
 	//Log("Progress is %d, visiting %d (%s)", dlg_progress, dlg_internal, text);
-	// TODO
+	// TODO	
 	if (dlg_internal == dlg_progress)
 	{
-		BroadcastDialogue(text, dlg_player, speaker ?? dlg_target);
+		BroadcastDialogue({ Prototype = DlgMessage(), text = text, sender = speaker ?? dlg_target, receiver = dlg_player});
 	}
 	++dlg_internal;
 }
@@ -227,9 +226,9 @@ private func DoBroadcast(string function, arg1, arg2, arg3, arg4, arg5, arg6, ar
 }
 
 
-public func BroadcastDialogue(string text, object player, object speaker)
+public func BroadcastDialogue(proplist message)
 {
-	DoBroadcast("OnBroadcastDialogue", text, player, speaker);
+	DoBroadcast("OnBroadcastDialogue", message);
 }
 
 

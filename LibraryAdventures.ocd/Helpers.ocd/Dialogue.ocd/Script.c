@@ -83,6 +83,7 @@ public func InitDialogue(string name, object target, bool attention)
 	}
 
 	var listener = CreateObject(Dialouge_MessageBoxListener, 0, 0, NO_OWNER);
+	listener->SetMenuTarget(this);
 	AddListener(listener);
 	
 	// Update dialogue to target.

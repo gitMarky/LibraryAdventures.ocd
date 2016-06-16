@@ -1,8 +1,10 @@
 
 
-public func OnBroadcastDialogue(string message, object player, object speaker)
+local menu_target;
+
+public func OnBroadcastDialogue(proplist message)
 {
-	MessageBox(message, player, speaker);
+	MessageBox(message.text, message.receiver, message.sender);
 }
 
 
@@ -62,6 +64,12 @@ public func MessageBoxBroadcast(string message, object player, object speaker, a
 	return MessageBox(message, player, speaker, nil, false, options);
 }
 
+
+public func SetMenuTarget(object target)
+{
+	menu_target = target ?? this;
+}
+
 static MessageBox_last_speaker, MessageBox_last_pos;
 
 
@@ -94,12 +102,7 @@ private func MessageBox(string message, object player, object speaker, int for_p
 	// A target player is given: Use a menu for this dialogue.
 	if (player && !as_message)
 	{
-		var menu_target, cmd;
-		if (this != DialogueEx)
-		{
-			menu_target = this;
-			cmd = "MenuOK";
-		}
+		var cmd = "MenuOK";
 		player->CreateMenu(DialogueEx, menu_target, C4MN_Extra_None, nil, nil, C4MN_Style_Dialog, false, DialogueEx);
 		
 		// Add NPC portrait.
