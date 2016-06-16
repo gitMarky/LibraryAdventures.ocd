@@ -81,6 +81,9 @@ public func InitDialogue(string name, object target, bool attention)
 		SetAction("Dialogue", target);
 		RemoveAttention();
 	}
+
+	var listener = CreateObject(Dialouge_MessageBoxListener, 0, 0, NO_OWNER);
+	AddListener(listener);
 	
 	// Update dialogue to target.
 	UpdateDialogue();

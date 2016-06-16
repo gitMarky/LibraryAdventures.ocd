@@ -1,15 +1,15 @@
 
 
 /**
- * Displays text.
- * If multiple calls to this function are executed in a row, then
- * the text should be output in several message boxes, where the user
- * has to confirm each of the messages individually.
- *
- * @par text this text will be displayed.
- * @par speaker the portrait of this object will be displayed. 
-                By default this is the object that the user is
-                speaking to.
+ Displays text.
+ If multiple calls to this function are executed in a row, then
+ the text should be output in several message boxes, where the user
+ has to confirm each of the messages individually.
+ 
+ @par text this text will be displayed.
+ @par speaker the portrait of this object will be displayed. 
+              By default this is the object that the user is
+              speaking to.
  */
 public func DlgText(string text, object speaker)
 {
@@ -17,10 +17,11 @@ public func DlgText(string text, object speaker)
 	// TODO
 	if (dlg_internal == dlg_progress)
 	{
-		MessageBox(text, dlg_player, speaker);
+		BroadcastDialogue(text, dlg_player, speaker);
 	}
 	++dlg_internal;
 }
+
 
 public func DlgOption(string text)
 {
@@ -34,6 +35,7 @@ public func DlgOption(string text)
 	return result || dlg_option > 0;
 }
 
+
 public func DlgReset()
 {
 	//Log("Progress is %d, resetting number is %d", dlg_progress, dlg_internal);
@@ -43,6 +45,7 @@ public func DlgReset()
 	}
 	++dlg_internal;
 }
+
 
 public func DlgOptionEnd()
 {
@@ -55,6 +58,7 @@ public func DlgOptionEnd()
 	}
 	++dlg_internal;
 }
+
 
 /**
  Adds an event to the dialogue.
@@ -83,8 +87,10 @@ public func DlgEvent(int delay)
 	return execute_event;
 }
 
+
 //-------------------------------------------------------------------------
 // properties
+
 
 local dlg_target; // the npc that provides this dialogue?
 local dlg_player; // the player who we are talking to
@@ -96,17 +102,27 @@ local dlg_section;   // if set, this string is included in progress callbacks (i
 local dlg_status;
 local dlg_interact;  // default true. can be set to false to deactivate the dialogue
 local dlg_attention; // if set, a red attention mark is put above the clonk
-local dlg_broadcast; // if set, all non-message (i.e. menu) MessageBox calls are called as MessageBoxBroadcast.
 local dlg_option; // branch depth
+local dlg_listeners; // array of all objects that are listening to the dialogue
+
 
 //-------------------------------------------------------------------------
 // internal functions
 
 protected func Initialize()
 {
+	dlg_listeners = [];
 	ResetDialogue();
 	_inherited(...);
 }
+
+
+protected func Destruction()
+{
+	BroadcastDestruction();
+	_inherited(...);
+}
+
 
 private func ResetDialogue()
 {
@@ -114,20 +130,17 @@ private func ResetDialogue()
 	dlg_internal = -1;
 }
 
+
 private func InDialogue(object player)
 {
 	return player->GetMenu() == Dialogue
 	    || player->GetMenu() == DialogueEx;
 }
 
-private func CloseMessageBox(object player)
-{
-	player->CloseMenu();
-}
-
 
 //-------------------------------------------------------------------------
 // logic
+
 
 /**
  Called on player interaction.
@@ -144,7 +157,7 @@ public func ProgressDialogue(object player)
 
 	// Currently in a dialogue: abort that dialogue.
 	if (InDialogue(player))
-		CloseMessageBox(player);	
+		BroadcastClose(player);
 
 		
 	// Dialogue still waiting? Do nothing then
@@ -153,19 +166,21 @@ public func ProgressDialogue(object player)
 	{
 		return false;
 	}
+
 		
 	// Stop dialogue?
 	if (dlg_status == DLG_Status_Stop)
 	{
-		CloseMessageBox(player);
+		BroadcastClose(player);
 		dlg_status = DLG_Status_Active;
 		return false;
 	}
 
+
 	// Remove dialogue?
 	if (dlg_status == DLG_Status_Remove)
 	{
-		CloseMessageBox(player);
+		BroadcastClose(player);
 		RemoveObject();
 		return false;		
 	}
@@ -196,161 +211,54 @@ public func ProgressDialogue(object player)
 	return true;
 }
 
-//------------------------------------------------------------------------
-// message boxes
-// since these are unchanged... maybe have them in another library in the objects??
 
-/**
- A message box for all players 
- @author Sven2
- @version 0.1.0
- */
-public func MessageBoxAll(string message, object speaker, bool as_message)
+//-------------------------------------------------------------------------
+// broadcasting
+
+
+private func DoBroadcast(string function, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
 {
-	for(var i = 0; i < GetPlayerCount(C4PT_User); ++i)
+	for (var listener in dlg_listeners)
 	{
-		var plr = GetPlayerByIndex(i, C4PT_User);
-		MessageBox(message, GetCursor(plr), speaker, plr, as_message);
+		if (listener == nil) continue;
+		
+		listener->Call(listener[function], arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 	}
 }
 
-/**
- Message box as dialog to player with a message copy to all other players
- @author Sven2
- @version 0.1.0
- */
-public func MessageBoxBroadcast(string message, object player, object speaker, array options)
+
+public func BroadcastDialogue(string text, object player, object speaker)
 {
-	// message copy to other players
-	for(var i = 0; i < GetPlayerCount(C4PT_User); ++i)
-	{
-		var plr = GetPlayerByIndex(i, C4PT_User);
-		if (GetCursor(plr) != player)
-			MessageBox(message, GetCursor(plr), speaker, plr, true);
-	}
-	// main message as dialog box
-	return MessageBox(message, player, speaker, nil, false, options);
+	DoBroadcast("OnBroadcastDialogue", text, player, speaker);
 }
 
-static MessageBox_last_speaker, MessageBox_last_pos;
 
-
-/**
- A single message box.
- @author Sven2
- @version 0.1.0
- */
-private func MessageBox(string message, object player, object speaker, int for_player, bool as_message, array options)
+public func BroadcastClose(object player)
 {
-	// broadcast enabled: message copy to other players
-	if (dlg_broadcast && !as_message)
-	{
-		for(var i = 0; i < GetPlayerCount(C4PT_User); ++i)
-		{
-			var other_plr = GetPlayerByIndex(i, C4PT_User);
-			if (GetCursor(other_plr) != player)
-				MessageBox(message, GetCursor(other_plr), speaker, other_plr, true);
-		}
-	}
-	// Use current NPC as speaker if unspecified.
-	// On definition call or without speaker, just show the message without a source
-	var portrait;
-	if (!speaker && this != DialogueEx) speaker = dlg_target;
-	if (speaker)
-	{
-		message = Format("<c %x>%s:</c> %s", speaker->GetColor(), speaker->GetName(), message);
-	    portrait = speaker->~GetPortrait();
-	}
-	
-	// A target player is given: Use a menu for this dialogue.
-	if (player && !as_message)
-	{
-		var menu_target, cmd;
-		if (this != DialogueEx)
-		{
-			menu_target = this;
-			cmd = "MenuOK";
-		}
-		player->CreateMenu(DialogueEx, menu_target, C4MN_Extra_None, nil, nil, C4MN_Style_Dialog, false, DialogueEx);
-		
-		// Add NPC portrait.
-		//var portrait = Format("%i", speaker->GetID()); //, DialogueEx, speaker->GetColor(), "1");
-		if (speaker)
-			if (portrait)
-				player->AddMenuItem("", nil, DialogueEx, nil, player, nil, C4MN_Add_ImgPropListSpec, portrait);
-			else
-				player->AddMenuItem("", nil, DialogueEx, nil, player, nil, C4MN_Add_ImgObject, speaker);
+	DoBroadcast("OnBroadcastClose", player);
+}
 
-		// Add NPC message.
-		player->AddMenuItem(message, nil, nil, nil, player, nil, C4MN_Add_ForceNoDesc);
-		
-		// Add answers.
-		if (options) for (var option in options)
-		{
-			var option_text, option_command;
-			if (GetType(option) == C4V_Array)
-			{
-				// Text+Command given
-				option_text = option[0];
-				option_command = option[1];
-				if (GetChar(option_command) == GetChar("#"))
-				{
-					// Command given as section name: Remove leading # and call section change
-					var ichar=1, ocmd = "", c;
-					while (c = GetChar(option_command, ichar++)) ocmd = Format("%s%c", ocmd, c);
-					option_command = Format("CallDialogue(Object(%d), 1, \"%s\")", player->ObjectNumber(), ocmd);
-				}
-				else
-				{
-					// if only a command is given, the standard parameter is just the player
-					if (!WildcardMatch(option_command, "*(*")) option_command = Format("%s(Object(%d))", option_command, player->ObjectNumber());
-				}
-			}
-			else
-			{
-				// Only text given - command means regular dialogue advance
-				option_text = option;
-				option_command = cmd;
-			}
-			player->AddMenuItem(option_text, option_command, nil, nil, player, nil, C4MN_Add_ForceNoDesc);
-		}
-		
-		// If there are no answers, add a next entry
-		if (cmd && !options) player->AddMenuItem("$Next$", cmd, nil, nil, player, nil, C4MN_Add_ForceNoDesc);
-		
-		// Set menu decoration.
-		player->SetMenuDecoration(GUI_MenuDeco);
-		
-		// Set text progress to NPC name.
-		if (speaker)
-		{
-			var name = speaker->GetName();
-			var n_length;
-			while (GetChar(name, n_length))
-				n_length++;
-			player->SetMenuTextProgress(n_length + 1);
-		}
-	}
-	else
+
+public func BroadcastDestruction()
+{
+	DoBroadcast("OnBroadcastDestruction");
+}
+
+public func AddListener(object listener)
+{
+	if (listener == nil)
 	{
-		// No target is given: Global (player) message
-		if (!GetType(for_player)) for_player = NO_OWNER;
-		// altenate left/right position as speakers change
-		if (speaker != MessageBox_last_speaker) MessageBox_last_pos = !MessageBox_last_pos;
-		MessageBox_last_speaker = speaker;
-		var flags = 0, xoff = 150;
-		if (!MessageBox_last_pos)
-		{
-			flags = MSG_Right;
-			xoff *= -1;
-			CustomMessage("", nil, for_player); // clear prev msg
-		}
-		else
-		{
-			CustomMessage("", nil, for_player, 0, 0, nil, nil, nil, MSG_Right);  // clear prev msg
-		}
-		CustomMessage(message, nil, for_player, xoff, 150, nil, GUI_MenuDeco, portrait ?? speaker, flags);
+		FatalError("Listener must not be nil.");
 	}
 
-	return;
+	if (!IsValueInArray(dlg_listeners, listener))
+	{
+		PushBack(dlg_listeners, listener);
+	}
+}
+
+
+public func RemoveListener(object listener)
+{
+	RemoveArrayValue(dlg_listeners, listener);
 }
