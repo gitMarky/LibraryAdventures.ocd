@@ -337,3 +337,86 @@ global func Test3_Completed()
 }
 
 global func Test3_OnFinished(){}
+
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+
+global func Test4_OnStart()
+{
+	Log("Test for DlgEvent(): Just the event");
+
+	Test().dialogue = Test().target->SetDialogueEx("TestDlgEvent1");
+	Test().dialogue->Interact(Test().user);
+
+	return true;
+}
+
+global func Test4_Completed()
+{
+	var rock = FindObject(Find_ID(Rock));
+	if (rock)
+	{
+		pass("A rock was created");
+		rock->RemoveObject();
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+global func Test4_OnFinished(){}
+
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+
+global func Test5_OnStart()
+{
+	Log("Test for DlgEvent(): Multiple calls, with text in between.");
+
+	Test().dialogue = Test().target->SetDialogueEx("TestDlgEvent2");
+	Test().dialogue->Interact(Test().user);
+
+	return true;
+}
+
+global func Test5_Completed()
+{
+	if (MenuWasOpened())
+	{
+		if (!Test().test5_rock)
+		{
+			if (FindObject(Find_ID(Rock)))
+			{
+				Test().test5_rock = true;
+				pass("Rock was created");
+			}
+		}
+		else
+		{
+			if (MenuWasClosed())
+			{
+				if (doTest("Rock should be removed. Got %v, expected %v.", FindObject(Find_ID(Rock)), nil))
+					return true;
+				else
+				{
+					FailTest();
+					return false;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+	
+	}
+	else
+	{
+		return false;
+	}
+}
+
+global func Test5_OnFinished(){}
+

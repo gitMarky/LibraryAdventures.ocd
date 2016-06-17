@@ -61,6 +61,7 @@ public func DlgOptionEnd()
 
 /**
  Adds an event to the dialogue.
+ @par delay the dialogue will wait this many frames after performing the event.
  @return Returns true, if the dialogue event should be performed.
  @example This dialogue gives a cookie to the player every time that it is called.
  {@code
@@ -74,7 +75,7 @@ public func DlgOptionEnd()
      }
  } 
  */
-public func DlgEvent(int delay)
+public func DlgEvent()
 {
 	var execute_event = false;
 	if (dlg_internal == dlg_progress)
