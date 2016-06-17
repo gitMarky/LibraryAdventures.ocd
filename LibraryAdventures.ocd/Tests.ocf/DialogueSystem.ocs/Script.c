@@ -420,3 +420,37 @@ global func Test5_Completed()
 
 global func Test5_OnFinished(){}
 
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+
+global func Test6_OnStart()
+{
+	Log("Test for DlgReset(): Countdown");
+
+	Test().dialogue = Test().target->SetDialogueEx("TestDlgReset");
+	Test().dialogue->Interact(Test().user);
+
+	return true;
+}
+
+global func Test6_Completed()
+{
+	if (MenuWasOpened() && MenuWasClosed())
+	{
+		if (doTest("Test countdown was at %d, expected %d.", Test().dialogue.test_reset_counter, 0))
+		{
+			return true;
+		}
+		else
+		{
+			FailTest();
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+
+global func Test6_OnFinished(){}

@@ -35,12 +35,24 @@ public func DlgOption(string text)
 }
 
 
+/**
+ Resets the dialogue, that is, the dialogue will start at the beginning again.
+ @example This will create an endless loop:
+ {@code
+     Dlg_Loop(object player)
+     {
+         DlgText("Are you tired of this message yet?");
+         DlgReset(); // starts the dialogue again
+     }
+ }
+ */
 public func DlgReset()
 {
 	//Log("Progress is %d, resetting number is %d", dlg_progress, dlg_internal);
 	if (dlg_internal == dlg_progress)
 	{
 		ResetDialogue();
+		ProgressDialogueDelayed();
 	}
 	++dlg_internal;
 }
@@ -81,7 +93,7 @@ public func DlgEvent()
 	if (dlg_internal == dlg_progress)
 	{
 		execute_event = true;
-		ScheduleCall(this, this.ProgressDialogue, 1, nil, dlg_player);
+		ProgressDialogueDelayed();
 	} // progress should be increased too
 	++dlg_internal;
 	return execute_event;
@@ -209,6 +221,12 @@ public func ProgressDialogue(object player)
 	}
 	
 	return true;
+}
+
+
+private func ProgressDialogueDelayed(int delay)
+{
+	ScheduleCall(this, this.ProgressDialogue, delay ?? 1, nil, dlg_player);
 }
 
 
