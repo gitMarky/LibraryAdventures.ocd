@@ -29,7 +29,14 @@ public func DlgOption(string text)
 	if (result)
 	{
 		++dlg_option;
+		ProgressDialogueDelayed();
 	}
+	
+	if (dlg_internal > dlg_progress)
+	{
+		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player});
+	}
+	
 	++dlg_internal;
 	return result || dlg_option > 0;
 }
@@ -248,6 +255,12 @@ private func DoBroadcast(string function, arg1, arg2, arg3, arg4, arg5, arg6, ar
 public func BroadcastDialogue(proplist message)
 {
 	DoBroadcast("OnBroadcastDialogue", message);
+}
+
+
+public func BroadcastOption(proplist message)
+{
+	DoBroadcast("OnBroadcastOption", message);
 }
 
 
