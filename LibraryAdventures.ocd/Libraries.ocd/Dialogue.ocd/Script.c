@@ -18,6 +18,7 @@ public func DlgText(string text, object speaker)
 	{
 		BroadcastDialogue({ Prototype = DlgMessage(), text = text, sender = speaker ?? dlg_target, receiver = dlg_player});
 	}
+	dlg_last_nonoption = dlg_internal;
 	++dlg_internal;
 }
 
@@ -32,7 +33,7 @@ public func DlgOption(string text)
 		ProgressDialogueDelayed();
 	}
 	
-	if (dlg_internal > dlg_progress)
+	if (dlg_internal > dlg_progress && dlg_progress == dlg_last_nonoption)
 	{
 		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player});
 	}
@@ -61,6 +62,7 @@ public func DlgReset()
 		ResetDialogue();
 		ProgressDialogueDelayed();
 	}
+	dlg_last_nonoption = dlg_internal;
 	++dlg_internal;
 }
 
@@ -74,7 +76,7 @@ public func DlgOptionEnd()
 	{
 		dlg_option = Max(0, dlg_option -1);
 	}
-	++dlg_internal;
+	//++dlg_internal;
 }
 
 
@@ -102,6 +104,7 @@ public func DlgEvent()
 		execute_event = true;
 		ProgressDialogueDelayed();
 	} // progress should be increased too
+	dlg_last_nonoption = dlg_internal;
 	++dlg_internal;
 	return execute_event;
 }
@@ -117,6 +120,7 @@ local dlg_name;
 local dlg_info;
 local dlg_progress; // the player progress
 local dlg_internal; // the internal id
+local dlg_last_nonoption; // the internal id of the last dialogue that was not an option
 local dlg_section;   // if set, this string is included in progress callbacks (i.e., func Dlg_[Name]_[Section][Progress]() is called)
 local dlg_status;
 local dlg_interact;  // default true. can be set to false to deactivate the dialogue
@@ -147,6 +151,7 @@ private func ResetDialogue()
 {
 	dlg_progress = -1;
 	dlg_internal = -1;
+	dlg_last_nonoption = -1;
 }
 
 
