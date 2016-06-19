@@ -26,20 +26,22 @@ public func DlgText(string text, object speaker)
 public func DlgOption(string text)
 {
 	// TODO
-	var result = dlg_internal == dlg_progress;
-	if (result)
+	Log("Visiting dialogue option: dlg_internal = %d, dlg_progress = %d, text = %s", dlg_internal, dlg_progress, text);
+	var selected_now = dlg_internal == dlg_progress;
+	var selected_previously = IsValueInArray(dlg_option, dlg_internal);
+	if (selected_now)
 	{
-		++dlg_option;
+		if (!selected_previously) PushBack(dlg_option, dlg_internal); // save the latest option
 		ProgressDialogueDelayed();
 	}
 	
 	if (dlg_internal > dlg_progress && dlg_progress == dlg_last_nonoption)
 	{
-		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player});
+		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player, override_progress = dlg_internal}); // the progress has to be set here, if the option is chosen!
 	}
-	
+
 	++dlg_internal;
-	return result || dlg_option > 0;
+	return selected_previously; // 
 }
 
 
@@ -74,7 +76,8 @@ public func DlgOptionEnd()
 	// it is!
 	if (dlg_internal == dlg_progress)
 	{
-		dlg_option = Max(0, dlg_option -1);
+		//dlg_option = Max(0, dlg_option -1);
+		PopBack(dlg_option); // remove the last option
 	}
 	//++dlg_internal;
 }
@@ -134,6 +137,7 @@ local dlg_listeners; // array of all objects that are listening to the dialogue
 
 protected func Initialize()
 {
+	dlg_option = [];
 	dlg_listeners = [];
 	ResetDialogue();
 	_inherited(...);
@@ -152,6 +156,7 @@ private func ResetDialogue()
 	dlg_progress = -1;
 	dlg_internal = -1;
 	dlg_last_nonoption = -1;
+	dlg_option = [];
 }
 
 
@@ -171,7 +176,7 @@ private func InDialogue(object player)
  @author Sven2
  @version 0.1.0
  */
-public func ProgressDialogue(object player)
+public func ProgressDialogue(object player, int override)
 {
 	// No conversation context: abort.
 	if (!dlg_name)
@@ -213,7 +218,15 @@ public func ProgressDialogue(object player)
 	// Update dialogue progress first.
 	dlg_player = player;
 	//var progress = dlg_progress;
-	dlg_progress++;
+	if (override)
+	{
+		dlg_progress = override;
+		Log(">>> Override set to %d", override);
+	}
+	else
+	{
+		dlg_progress++;
+	}
 	dlg_internal = 0;
 	// Then call relevant functions.
 	// Call generic function first, then progress function
@@ -236,9 +249,9 @@ public func ProgressDialogue(object player)
 }
 
 
-private func ProgressDialogueDelayed(int delay)
+private func ProgressDialogueDelayed(int delay, int override)
 {
-	ScheduleCall(this, this.ProgressDialogue, delay ?? 1, nil, dlg_player);
+	ScheduleCall(this, this.ProgressDialogue, delay ?? 1, nil, dlg_player, override);
 }
 
 

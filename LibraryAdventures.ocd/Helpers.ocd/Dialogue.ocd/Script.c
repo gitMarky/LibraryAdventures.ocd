@@ -223,14 +223,14 @@ public func CallDialogue(object clonk, progress, string section)
 }
 
 // Called on player interaction.
-public func Interact(object clonk)
+public func Interact(object clonk, int override_progress)
 {
 	// Should not happen: not active -> stop interaction
 	if (!dlg_interact) return true;	
 
 	SetSpeakerDirs(dlg_target, clonk); // Have speakers face each other
 
-	if (ProgressDialogue(clonk))
+	if (ProgressDialogue(clonk, override_progress))
 	{	
 		RemoveAttention(); // Remove attention mark on first interaction
 	}
@@ -239,10 +239,10 @@ public func Interact(object clonk)
 }
 
 
-public func MenuOK(proplist menu_id, object clonk)
+public func MenuOK(object clonk, int override_progress)
 {
 	// prevent the menu from closing when pressing MenuOK
-	if (dlg_interact) Interact(clonk);
+	if (dlg_interact) Interact(clonk, override_progress);
 }
 
 public func SetSpeakerDirs(object speaker1, object speaker2)

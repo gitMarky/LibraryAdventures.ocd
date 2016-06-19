@@ -12,7 +12,7 @@ public func OnBroadcastDialogue(proplist message)
 
 public func OnBroadcastOption(proplist message)
 {
-	MessageBoxAddOption(message.text, message.receiver);
+	MessageBoxAddOption(message);
 }
 
 
@@ -168,7 +168,7 @@ private func MessageBox(string message, object player, object speaker, int for_p
 
 private func WaitForOptions(object player, cmd)
 {
-	ScheduleCall(this, this.AddNextOption, 1, nil, player, cmd);
+	ScheduleCall(this, this.AddNextOption, 1, nil, player, FormatMenuCommand(cmd, { Prototype = DlgMessage(), receiver = player}));
 }
 
 private func AddNextOption(object player, cmd)
@@ -176,40 +176,52 @@ private func AddNextOption(object player, cmd)
 	if (!has_options)
 	{
 		// If there are no answers, add a next entry
-		if (cmd) player->AddMenuItem("$Next$", cmd, nil, nil, player, nil, C4MN_Add_ForceNoDesc);
+//		if (cmd) player->AddMenuItem("$Next$", cmd, nil, nil, player, nil, C4MN_Add_ForceNoDesc);
+		if (cmd) player->AddMenuItem("$Next$", cmd, nil, nil, nil, nil, C4MN_Add_ForceNoDesc);
 	}
 }
 
 
-private func MessageBoxAddOption(option, object player)
+private func MessageBoxAddOption(proplist option)
 {
 	// Add answers.
 	var option_text, option_command;
-	if (GetType(option) == C4V_Array)
-	{
-		// Text+Command given
-		option_text = option[0];
-		option_command = option[1];
-		if (GetChar(option_command) == GetChar("#"))
-		{
-			// Command given as section name: Remove leading # and call section change
-			var ichar=1, ocmd = "", c;
-			while (c = GetChar(option_command, ichar++)) ocmd = Format("%s%c", ocmd, c);
-			option_command = Format("CallDialogue(Object(%d), 1, \"%s\")", player->ObjectNumber(), ocmd);
-		}
-		else
-		{
-			// if only a command is given, the standard parameter is just the player
-			if (!WildcardMatch(option_command, "*(*")) option_command = Format("%s(Object(%d))", option_command, player->ObjectNumber());
-		}
-	}
-	else
-	{
+//	if (GetType(option) == C4V_Array)
+//	{
+//		// Text+Command given
+//		option_text = option[0];
+//		option_command = option[1];
+//		if (GetChar(option_command) == GetChar("#"))
+//		{
+//			// Command given as section name: Remove leading # and call section change
+//			var ichar=1, ocmd = "", c;
+//			while (c = GetChar(option_command, ichar++)) ocmd = Format("%s%c", ocmd, c);
+//			option_command = Format("CallDialogue(Object(%d), 1, \"%s\")", player->ObjectNumber(), ocmd);
+//		}
+//		else
+//		{
+//			// if only a command is given, the standard parameter is just the player
+//			if (!WildcardMatch(option_command, "*(*")) option_command = Format("%s(Object(%d))", option_command, player->ObjectNumber());
+//		}
+//	}
+//	else
+//	{
 		// Only text given - command means regular dialogue advance
-		option_text = option;
+		option_text = option.text;
 		option_command = MENU_OK_COMMAND;
-	}
-	player->AddMenuItem(option_text, option_command, nil, nil, player, nil, C4MN_Add_ForceNoDesc);
+//	}
+
+	var player = option.receiver;
+	
+	option_command = FormatMenuCommand(option_command, option);
+
+	//player->AddMenuItem(option_text, option_command, nil, nil, player, nil, C4MN_Add_ForceNoDesc);
+	player->AddMenuItem(option_text, option_command, nil, nil, nil, nil, C4MN_Add_ForceNoDesc);
 	has_options = true;
 }
 
+
+func FormatMenuCommand(string option_command, proplist option)
+{
+	return Format("%s(Object(%d), %v)", option_command, option.receiver->ObjectNumber(), option.override_progress);
+}
