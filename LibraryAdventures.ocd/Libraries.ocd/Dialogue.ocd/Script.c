@@ -28,7 +28,9 @@ public func DlgOption(string text)
 	// TODO
 	var selected_now = dlg_internal == dlg_progress;
 	var selected_previously = IsValueInArray(dlg_option, dlg_internal);
-	var add_option = dlg_internal > dlg_progress && dlg_progress == dlg_last_nonoption;
+	var possible_option = dlg_internal > dlg_progress;
+	var under_text = dlg_progress == dlg_last_nonoption;
+	var add_option = possible_option && under_text;
 	Log("Visiting dialogue option: dlg_internal = %d, dlg_progress = %d, text = %s, selected prev = %v, selected now = %v, add = %v", dlg_internal, dlg_progress, text, selected_previously, selected_now, add_option);
 	if (selected_now)
 	{
@@ -84,6 +86,7 @@ public func DlgOptionEnd()
 		//dlg_option = Max(0, dlg_option -1);
 		PopBack(dlg_option); // remove the last option
 	}
+	dlg_last_nonoption = dlg_internal;
 	//++dlg_internal;
 }
 
