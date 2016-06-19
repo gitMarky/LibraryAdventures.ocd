@@ -50,25 +50,21 @@ func Dlg_TestDlgOption2(object player)
 		}
 		DlgOptionEnd();
 	}
-	if (DlgOption("Option 2: Choices 2 more levels deep."))
+	if (!test_forked_dialogues[2] && DlgOption("Option 2: Choices 2 more levels deep."))
 	{
 		Log("* Handling choice 2");
 		DlgText("You chose option 2.");
-		if (!(test_forked_dialogues[2] && test_forked_dialogues[3]) && DlgOption("Option 2.1"))
+		if (DlgOption("Option 2.1"))
 		{
 			Log("* Handling choice 2.1");
 			DlgText("You chose option 2.1");
-			if (DlgEvent())
-			{
-				test_forked_dialogues[2] = true;
-			}
 			if (DlgOption("Option 2.1.1"))
 			{
 				Log("* Handling choice 2.1.1");
 				DlgText("You chose option 2.1.1");
 				if (DlgReset())
 				{
-					test_forked_dialogues[3] = true;
+					test_forked_dialogues[2] = true;
 				}
 			}
 			if (DlgOption("Return"))
@@ -80,8 +76,7 @@ func Dlg_TestDlgOption2(object player)
 		
 		if (test_forked_dialogues[0]
 		 && test_forked_dialogues[1]
-		 && test_forked_dialogues[2]
-		 && test_forked_dialogues[3])
+		 && test_forked_dialogues[2])
 		{
 			DlgText("Congratulations, you clicked through all options.");
 		}
