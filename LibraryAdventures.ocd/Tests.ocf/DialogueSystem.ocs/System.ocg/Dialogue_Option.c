@@ -27,7 +27,7 @@ func Dlg_TestDlgOption2(object player)
 	if (!test_forked_dialogues) test_forked_dialogues = [];
 
 	DlgText("Testing forked options. Go through all the options.");
-	if (DlgOption("Option 1: 2 choices on a lower level."))
+	if (!(test_forked_dialogues[0] && test_forked_dialogues[1]) && DlgOption("Option 1: 2 choices on a lower level."))
 	{
 		DlgText("You chose option 1.");
 		if (!test_forked_dialogues[0] && DlgOption("Option 1.1"))
@@ -72,15 +72,16 @@ func Dlg_TestDlgOption2(object player)
 				DlgReset();
 			}
 			DlgOptionEnd();
-		}
-		
-		if (test_forked_dialogues[0]
-		 && test_forked_dialogues[1]
-		 && test_forked_dialogues[2])
-		{
-			DlgText("Congratulations, you clicked through all options.");
-		}
+		}		
 	}
+	
+	if (test_forked_dialogues[0]
+	 && test_forked_dialogues[1]
+	 && test_forked_dialogues[2])
+	{
+		DlgText("Congratulations, you clicked through all options.");
+	}
+	
 }
 
 
