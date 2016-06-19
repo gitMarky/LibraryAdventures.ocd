@@ -7,7 +7,7 @@ protected func InitializePlayer(int plr)
 	SetFoW(false, plr);
 		
 	// Start!
-	LaunchTest(7);
+	LaunchTest(8);
 	return;
 }
 
@@ -481,4 +481,31 @@ global func Test7_Completed()
 }
 
 global func Test7_OnFinished(){}
+
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+
+global func Test8_OnStart()
+{
+	Log("Test for DlgOption(): Adding options without preceding dialogue");
+
+	Test().dialogue = Test().target->SetDialogueEx("TestDlgOption2");
+	Test().dialogue->Interact(Test().user);
+
+	return true;
+}
+
+global func Test8_Completed()
+{
+	if (MenuWasOpened() && MenuWasClosed())
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+global func Test8_OnFinished(){}
 
