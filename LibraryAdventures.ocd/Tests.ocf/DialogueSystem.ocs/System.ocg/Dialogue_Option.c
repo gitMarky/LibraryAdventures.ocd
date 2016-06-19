@@ -32,29 +32,31 @@ func Dlg_TestDlgOption2(object player)
 		DlgText("You chose option 1.");
 		if (!test_forked_dialogues[0] && DlgOption("Option 1.1"))
 		{
+			Log("* Handling choice 1.1");
 			DlgText("You chose option 1.1");
-			if (DlgEvent())
+			if (DlgReset())
 			{
 				test_forked_dialogues[0] = true;
 			}
-			DlgReset();
 		}
 		if (!test_forked_dialogues[1] && DlgOption("Option 1.2"))
 		{
+			Log("* Handling choice 1.2");
 			DlgText("You chose option 1.2");
-			if (DlgEvent())
+			if (DlgReset())
 			{
 				test_forked_dialogues[1] = true;
 			}
-			DlgReset();
 		}
 		DlgOptionEnd();
 	}
 	if (DlgOption("Option 2: Choices 2 more levels deep."))
 	{
+		Log("* Handling choice 2");
 		DlgText("You chose option 2.");
 		if (!(test_forked_dialogues[2] && test_forked_dialogues[3]) && DlgOption("Option 2.1"))
 		{
+			Log("* Handling choice 2.1");
 			DlgText("You chose option 2.1");
 			if (DlgEvent())
 			{
@@ -62,12 +64,12 @@ func Dlg_TestDlgOption2(object player)
 			}
 			if (DlgOption("Option 2.1.1"))
 			{
+				Log("* Handling choice 2.1.1");
 				DlgText("You chose option 2.1.1");
-				if (DlgEvent())
+				if (DlgReset())
 				{
 					test_forked_dialogues[3] = true;
 				}
-				DlgReset();
 			}
 			if (DlgOption("Return"))
 			{

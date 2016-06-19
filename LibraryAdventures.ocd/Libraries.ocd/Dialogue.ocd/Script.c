@@ -12,7 +12,7 @@
  */
 public func DlgText(string text, object speaker)
 {
-	//Log("Progress is %d, visiting %d (%s)", dlg_progress, dlg_internal, text);
+	Log("Progress is %d, visiting %d (%s)", dlg_progress, dlg_internal, text);
 	// TODO	
 	if (dlg_internal == dlg_progress)
 	{
@@ -26,16 +26,18 @@ public func DlgText(string text, object speaker)
 public func DlgOption(string text)
 {
 	// TODO
-	Log("Visiting dialogue option: dlg_internal = %d, dlg_progress = %d, text = %s", dlg_internal, dlg_progress, text);
 	var selected_now = dlg_internal == dlg_progress;
 	var selected_previously = IsValueInArray(dlg_option, dlg_internal);
+	var add_option = dlg_internal > dlg_progress && dlg_progress == dlg_last_nonoption;
+	Log("Visiting dialogue option: dlg_internal = %d, dlg_progress = %d, text = %s, selected prev = %v, selected now = %v, add = %v", dlg_internal, dlg_progress, text, selected_previously, selected_now, add_option);
 	if (selected_now)
 	{
+		Log("* Took option: %s", text);
 		if (!selected_previously) PushBack(dlg_option, dlg_internal); // save the latest option
 		ProgressDialogueDelayed();
 	}
 	
-	if (dlg_internal > dlg_progress && dlg_progress == dlg_last_nonoption)
+	if (add_option)
 	{
 		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player, override_progress = dlg_internal}); // the progress has to be set here, if the option is chosen!
 	}
@@ -59,13 +61,16 @@ public func DlgOption(string text)
 public func DlgReset()
 {
 	//Log("Progress is %d, resetting number is %d", dlg_progress, dlg_internal);
+	var execute_event = false;
 	if (dlg_internal == dlg_progress)
 	{
+		execute_event = true;
 		ResetDialogue();
 		ProgressDialogueDelayed();
 	}
 	dlg_last_nonoption = dlg_internal;
 	++dlg_internal;
+	return execute_event;
 }
 
 
