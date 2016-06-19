@@ -48,6 +48,7 @@ func Dlg_TestDlgOption2(object player)
 			}
 			DlgReset();
 		}
+		DlgOptionEnd();
 	}
 	if (DlgOption("Option 2: Choices 2 more levels deep."))
 	{
@@ -72,6 +73,7 @@ func Dlg_TestDlgOption2(object player)
 			{
 				DlgReset();
 			}
+			DlgOptionEnd();
 		}
 		
 		if (test_forked_dialogues[0]

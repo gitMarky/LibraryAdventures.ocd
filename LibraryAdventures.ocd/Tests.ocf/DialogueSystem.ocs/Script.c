@@ -499,7 +499,8 @@ global func Test8_Completed()
 {
 	if (MenuWasOpened() && MenuWasClosed())
 	{
-		return true;
+		var results = Test().dialogue.test_forked_dialogues;
+		return results[0] && results[1] && results[2] && results[3];
 	}
 	else
 	{
