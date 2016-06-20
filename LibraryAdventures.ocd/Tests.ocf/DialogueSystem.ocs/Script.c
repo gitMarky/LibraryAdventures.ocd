@@ -218,7 +218,7 @@ global func MenuWasClosed()
 
 global func CountDialogueProgress()
 {
-	Test().max_internal = Max(Test().max_internal, Test().dialogue.dlg_internal);
+	Test().max_internal = Max(Test().max_internal, Test().dialogue.dlg_internal[Test().dialogue.dlg_layer]);
 }
 
 global func GetDialogueProgress()
