@@ -45,7 +45,7 @@ public func DlgOption(string text)
 	}
 
 	++dlg_internal;
-	return selected_previously; // 
+	return selected_previously; 
 }
 
 
@@ -83,7 +83,6 @@ public func DlgOptionEnd()
 	// it is!
 	if (dlg_internal == dlg_progress)
 	{
-		//dlg_option = Max(0, dlg_option -1);
 		PopBack(dlg_option); // remove the last option
 	}
 	dlg_last_nonoption = dlg_internal;
