@@ -7,7 +7,7 @@ protected func InitializePlayer(int plr)
 	SetFoW(false, plr);
 		
 	// Start!
-	LaunchTest(8);
+	LaunchTest(9);
 	return;
 }
 
@@ -487,7 +487,7 @@ global func Test7_OnFinished(){}
 
 global func Test8_OnStart()
 {
-	Log("Test for DlgOption(): Adding options without preceding dialogue");
+	Log("Test for DlgOption(): Forked/multi-level options. The player has to visit all options");
 
 	Test().dialogue = Test().target->SetDialogueEx("TestDlgOption2");
 	Test().dialogue->Interact(Test().user);
@@ -509,4 +509,31 @@ global func Test8_Completed()
 }
 
 global func Test8_OnFinished(){}
+
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+
+global func Test9_OnStart()
+{
+	Log("Test for DlgOption(): Options that are always present?");
+
+	Test().dialogue = Test().target->SetDialogueEx("TestDlgOption3");
+	Test().dialogue->Interact(Test().user);
+
+	return true;
+}
+
+global func Test9_Completed()
+{
+	if (MenuWasOpened() && MenuWasClosed())
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+global func Test9_OnFinished(){}
 
