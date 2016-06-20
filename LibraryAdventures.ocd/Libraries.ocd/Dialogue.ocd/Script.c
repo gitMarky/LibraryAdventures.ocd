@@ -12,12 +12,21 @@
  */
 public func DlgText(string text, object speaker)
 {
-	Log("Progress is %d, visiting %d (%s), Layer = %d", dlg_progress[dlg_layer], dlg_internal[dlg_layer], text, dlg_layer);
+	//Log("Progress is %d, visiting %d (%s), Layer = %d", dlg_progress[dlg_layer], dlg_internal[dlg_layer], text, dlg_layer);
+	
+	var log_output = Format("L(%d)/I(%d): %s", dlg_layer, dlg_internal[dlg_layer], text); 
+	
 	// TODO	
 	if (dlg_internal[dlg_layer] == dlg_progress[dlg_layer])
 	{
 		BroadcastDialogue({ Prototype = DlgMessage(), text = text, sender = speaker ?? dlg_target, receiver = dlg_player});
+		Log("* %s", log_output);
 	}
+	else
+	{
+		Log("  %s", log_output);
+	}
+	
 	dlg_last_nonoption[dlg_layer] = dlg_internal[dlg_layer];
 	++dlg_internal[dlg_layer];
 }
@@ -32,10 +41,15 @@ public func DlgOption(string text)
 	var possible_option = dlg_internal[dlg_layer] >= dlg_progress[dlg_layer];
 	var under_text = dlg_progress[dlg_layer] == dlg_last_nonoption[dlg_layer];
 	var add_option = possible_option && under_text;
-	Log("Visiting dialogue option: dlg_internal = %d / %d, dlg_progress = %d, text = %s, selected prev = %v, selected now = %v, add = %v", dlg_internal[dlg_layer], internal, dlg_progress[dlg_layer], text, selected_previously, selected_now, add_option);
+	
+	var log_output = Format("L(%d)/I(%d): %s", dlg_layer, dlg_internal[dlg_layer], text); 
+	
+	
+	//Log("Visiting dialogue option: dlg_internal = %d / %d, dlg_progress = %d, text = %s, selected prev = %v, selected now = %v, add = %v", dlg_internal[dlg_layer], internal, dlg_progress[dlg_layer], text, selected_previously, selected_now, add_option);
 	if (selected_now)
 	{
-		Log("* Took option: %s", text);
+		Log("* %s", log_output);
+		//Log("* Took option: %s", text);
 		if (!selected_previously)
 		{
 			Log("* Going one layer deeper");
@@ -44,6 +58,11 @@ public func DlgOption(string text)
 		}
 		ProgressDialogueDelayed();
 	}
+	else
+	{
+		Log("  %s", log_output);
+	}
+	
 	
 	if (add_option)
 	{
@@ -72,6 +91,8 @@ public func DlgOption(string text)
  */
 public func DlgReset()
 {
+	var log_output = Format("L(%d)/I(%d): DlgReset()", dlg_layer, dlg_internal[dlg_layer]); 
+
 	//Log("Progress is %d, resetting number is %d", dlg_progress, dlg_internal);
 	var execute_event = false;
 	if (dlg_internal[dlg_layer] == dlg_progress[dlg_layer])
@@ -79,7 +100,13 @@ public func DlgReset()
 		execute_event = true;
 		ResetDialogue();
 		ProgressDialogueDelayed();
+		Log("* %s", log_output);
 	}
+	else
+	{
+		Log("  %s", log_output);
+	}
+	
 	dlg_last_nonoption[dlg_layer] = dlg_internal[dlg_layer];
 	++dlg_internal[dlg_layer];
 	return execute_event;
@@ -88,15 +115,22 @@ public func DlgReset()
 
 public func DlgOptionEnd()
 {
+	var log_output = Format("L(%d)/I(%d): DlgOptionEnd()", dlg_layer, dlg_internal[dlg_layer]); 
 	// TODO
 	// not sure if this is necessary
 	// it is!
 	if (dlg_internal[dlg_layer] == dlg_progress[dlg_layer])
 	{
-			Log("* Going one layer higher");
+//			Log("* Going one layer higher");
 		--dlg_layer;
 		PopBack(dlg_option); // remove the last option
+		Log("*  %s", log_output);
 	}
+	else
+	{
+		Log("  %s", log_output);
+	}
+
 	dlg_last_nonoption[dlg_layer] = dlg_internal[dlg_layer];
 }
 
@@ -119,12 +153,20 @@ public func DlgOptionEnd()
  */
 public func DlgEvent()
 {
+	var log_output = Format("L(%d)/I(%d): DlgEvent()", dlg_layer, dlg_internal[dlg_layer]); 
+
 	var execute_event = false;
 	if (dlg_internal[dlg_layer] == dlg_progress[dlg_layer])
 	{
 		execute_event = true;
 		ProgressDialogueDelayed();
+		Log("* %s", log_output);
 	} // progress should be increased too
+	else
+	{
+		Log("  %s", log_output);
+	}
+	
 	dlg_last_nonoption[dlg_layer] = dlg_internal[dlg_layer];
 	++dlg_internal[dlg_layer];
 	return execute_event;
@@ -268,20 +310,22 @@ public func ProgressDialogue(object player, int override)
 		RemoveObject();
 		return false;		
 	}
-	
+		
 	// Start conversation context.
 	// Update dialogue progress first.
 	dlg_player = player;
-	//var progress = dlg_progress;
 	if (override)
 	{
 		dlg_progress[dlg_layer] = override;
-		Log(">>> Override set to %d", override);
+		//Log(">>> Override set to %d", override);
 	}
 	else
 	{
 		dlg_progress[dlg_layer]++;
 	}
+
+	Log("-----------------------------------------");
+	Log("Progress dialogue: %v", dlg_progress);
 	
 	for (var i = 0; i <= dlg_layer; ++i)
 	{	
