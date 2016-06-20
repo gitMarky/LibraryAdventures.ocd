@@ -14,7 +14,7 @@ public func DlgText(string text, object speaker)
 {
 	//Log("Progress is %d, visiting %d (%s), Layer = %d", dlg_progress[dlg_layer], dlg_internal[dlg_layer], text, dlg_layer);
 	
-	var log_output = Format("L(%d)/I(%d): %s", dlg_layer, dlg_internal[dlg_layer], text); 
+	var log_output = Format("L(%d)/I(%d): %s", dlg_internal_layer, dlg_internal[dlg_layer], text); 
 	
 	// TODO	
 	if (dlg_internal[dlg_layer] == dlg_progress[dlg_layer])
@@ -25,38 +25,22 @@ public func DlgText(string text, object speaker)
 	else
 	{
 		Log("  %s", log_output);
-	}
-	
-	dlg_last_nonoption[dlg_layer] = dlg_internal[dlg_layer];
-	++dlg_internal[dlg_layer];
+	}	
+	++dlg_internal[dlg_internal_layer];
 }
 
 
 public func DlgOption(string text)
 {
 	// TODO
-	var internal = dlg_internal[dlg_layer] + dlg_internal_option[dlg_layer];
-	var selected_now = internal == dlg_progress[dlg_layer];
-	var selected_previously = (dlg_option[dlg_layer] == internal);
-	var possible_option = dlg_internal[dlg_layer] >= dlg_progress[dlg_layer];
-	var under_text = dlg_progress[dlg_layer] == dlg_last_nonoption[dlg_layer];
-	var add_option = possible_option && under_text;
+	var display_option = dlg_progress[dlg_layer] == (dlg_internal[dlg_layer] - 1);
+	var was_chosen = dlg_option[dlg_internal_layer] == dlg_internal_option[dlg_internal_layer];
 	
-	var log_output = Format("L(%d)/I(%d): %s", dlg_layer, dlg_internal[dlg_layer], text); 
+	var log_output = Format("L(%d)/I(%d): %s, display = %v, chosen = %v", dlg_internal_layer, dlg_internal[dlg_layer], text, display_option, was_chosen); 
 	
-	
-	//Log("Visiting dialogue option: dlg_internal = %d / %d, dlg_progress = %d, text = %s, selected prev = %v, selected now = %v, add = %v", dlg_internal[dlg_layer], internal, dlg_progress[dlg_layer], text, selected_previously, selected_now, add_option);
-	if (selected_now)
+	if (was_chosen)
 	{
 		Log("* %s", log_output);
-		//Log("* Took option: %s", text);
-		if (!selected_previously)
-		{
-			Log("* Going one layer deeper");
-			dlg_option[dlg_layer] = internal; // save the latest option
-			dlg_request_layer_increase = true;
-		}
-		ProgressDialogueDelayed();
 	}
 	else
 	{
@@ -64,17 +48,13 @@ public func DlgOption(string text)
 	}
 	
 	
-	if (add_option)
+	if (display_option)
 	{
-		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player, override_progress = internal}); // the progress has to be set here, if the option is chosen!
+		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player, override_progress = dlg_internal_option}); // the progress has to be set here, if the option is chosen!
 	}
 	
-	++dlg_internal_option[dlg_layer];
-	if (selected_previously)
-	{
-		dlg_internal[dlg_layer] += dlg_internal_option[dlg_layer];
-	}
-	return selected_previously; 
+	++dlg_internal_layer;
+	++dlg_internal_option[dlg_internal_layer];
 }
 
 
@@ -91,7 +71,7 @@ public func DlgOption(string text)
  */
 public func DlgReset()
 {
-	var log_output = Format("L(%d)/I(%d): DlgReset()", dlg_layer, dlg_internal[dlg_layer]); 
+	var log_output = Format("L(%d)/I(%d): DlgReset()", dlg_internal_layer, dlg_internal[dlg_layer]); 
 
 	//Log("Progress is %d, resetting number is %d", dlg_progress, dlg_internal);
 	var execute_event = false;
@@ -107,22 +87,21 @@ public func DlgReset()
 		Log("  %s", log_output);
 	}
 	
-	dlg_last_nonoption[dlg_layer] = dlg_internal[dlg_layer];
-	++dlg_internal[dlg_layer];
+	++dlg_internal[dlg_internal_layer];
 	return execute_event;
 }
 
 
 public func DlgOptionEnd()
 {
-	var log_output = Format("L(%d)/I(%d): DlgOptionEnd()", dlg_layer, dlg_internal[dlg_layer]); 
+	var log_output = Format("L(%d)/I(%d): DlgOptionEnd()", dlg_internal_layer, dlg_internal[dlg_layer]); 
 	// TODO
 	// not sure if this is necessary
 	// it is!
 	if (dlg_internal[dlg_layer] == dlg_progress[dlg_layer])
 	{
 //			Log("* Going one layer higher");
-		--dlg_layer;
+//		--dlg_layer;
 		PopBack(dlg_option); // remove the last option
 		Log("*  %s", log_output);
 	}
@@ -130,8 +109,8 @@ public func DlgOptionEnd()
 	{
 		Log("  %s", log_output);
 	}
-
-	dlg_last_nonoption[dlg_layer] = dlg_internal[dlg_layer];
+	
+	--dlg_internal_layer;
 }
 
 
@@ -167,8 +146,7 @@ public func DlgEvent()
 		Log("  %s", log_output);
 	}
 	
-	dlg_last_nonoption[dlg_layer] = dlg_internal[dlg_layer];
-	++dlg_internal[dlg_layer];
+	++dlg_internal[dlg_internal_layer];
 	return execute_event;
 }
 
@@ -181,18 +159,19 @@ local dlg_target; // the npc that provides this dialogue?
 local dlg_player; // the player who we are talking to
 local dlg_name;
 local dlg_info;
-local dlg_progress; // the player progress
-local dlg_internal; // the internal id
-local dlg_internal_option; // the internal option id
-local dlg_last_nonoption; // the internal id of the last dialogue that was not an option
 local dlg_section;   // if set, this string is included in progress callbacks (i.e., func Dlg_[Name]_[Section][Progress]() is called)
 local dlg_status;
 local dlg_interact;  // default true. can be set to false to deactivate the dialogue
 local dlg_attention; // if set, a red attention mark is put above the clonk
-local dlg_option; // branch depth
 local dlg_listeners; // array of all objects that are listening to the dialogue
+
+local dlg_progress; // the player progress
+local dlg_option; // branch depth
 local dlg_layer; // layer of the dialogue, important for options processing
-local dlg_request_layer_increase;
+
+local dlg_internal; // the internal id
+local dlg_internal_option; // the internal option id
+local dlg_internal_layer;
 
 
 //-------------------------------------------------------------------------
@@ -206,7 +185,6 @@ protected func Initialize()
 	dlg_progress = [];
 	dlg_internal = [];
 	dlg_internal_option = [];
-	dlg_last_nonoption = [];
 	ResetDialogue();
 	_inherited(...);
 }
@@ -227,31 +205,18 @@ private func ResetDialogue(int layer)
 		dlg_progress = [];
 		dlg_internal = [];
 		dlg_internal_option = [];
-		dlg_last_nonoption = [];
 		dlg_progress[0] = -1;
-		dlg_last_nonoption[0] = -1;
 		dlg_option = [];
 	}
 	else
 	{
 		dlg_progress[layer] = -1;
-		dlg_last_nonoption[layer] = -1;
 
 		// advance progress in the previous layer
-		if (dlg_request_layer_increase)
+		if (layer > 0)
 		{
-			dlg_layer += 1;
-			dlg_request_layer_increase = false;
-			ProgressDialogueDelayed(); // Go on in the next layer
-		}
-		else
-		{
-			if (layer > 0)
-			{
-				dlg_layer -= 1;
-				dlg_progress[layer] += 1;
-				dlg_last_nonoption[layer] = dlg_progress;
-			}
+			dlg_layer -= 1;
+			dlg_progress[layer] += 1;
 		}
 	}
 }
@@ -273,7 +238,7 @@ private func InDialogue(object player)
  @author Sven2
  @version 0.1.0
  */
-public func ProgressDialogue(object player, int override)
+public func ProgressDialogue(object player, int option_choice)
 {
 	// No conversation context: abort.
 	if (!dlg_name)
@@ -314,19 +279,18 @@ public func ProgressDialogue(object player, int override)
 	// Start conversation context.
 	// Update dialogue progress first.
 	dlg_player = player;
-	if (override)
+	if (option_choice)
 	{
-		dlg_progress[dlg_layer] = override;
-		//Log(">>> Override set to %d", override);
+		Log("Took option %d", option_choice);
+		dlg_option[dlg_layer] = option_choice;
+		dlg_layer += 1;
 	}
-	else
-	{
-		dlg_progress[dlg_layer]++;
-	}
+	dlg_progress[dlg_layer]++;
 
 	Log("-----------------------------------------");
 	Log("Progress dialogue: %v", dlg_progress);
 	
+	dlg_internal_layer = 0;
 	for (var i = 0; i <= dlg_layer; ++i)
 	{	
 		dlg_internal[i] = 0;
@@ -353,9 +317,9 @@ public func ProgressDialogue(object player, int override)
 }
 
 
-private func ProgressDialogueDelayed(int delay, int override)
+private func ProgressDialogueDelayed(int delay, int option_choice)
 {
-	ScheduleCall(this, this.ProgressDialogue, delay ?? 1, nil, dlg_player, override);
+	ScheduleCall(this, this.ProgressDialogue, delay ?? 1, nil, dlg_player, option_choice);
 }
 
 
