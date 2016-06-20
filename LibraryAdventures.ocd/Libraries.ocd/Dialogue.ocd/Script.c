@@ -34,7 +34,8 @@ public func DlgOption(string text)
 {
 	++dlg_internal_option[dlg_internal_layer];
 	// TODO
-	var display_option = dlg_progress[dlg_layer] == dlg_internal[dlg_layer];
+	var display_option = (dlg_layer == dlg_internal_layer)
+	                  && (dlg_progress[dlg_layer] == dlg_internal[dlg_layer]);
 	var was_chosen = dlg_option[dlg_internal_layer] == dlg_internal_option[dlg_internal_layer];
 	
 	var log_output = Format("L(%d)/I(%d): %s, display = %v, chosen = %v", dlg_internal_layer, dlg_internal[dlg_layer], text, display_option, was_chosen); 
@@ -102,7 +103,7 @@ public func DlgOptionEnd()
 //			Log("* Going one layer higher");
 //		--dlg_layer;
 		PopBack(dlg_option); // remove the last option
-		Log("*  %s", log_output);
+		Log("* %s", log_output);
 	}
 	else
 	{
