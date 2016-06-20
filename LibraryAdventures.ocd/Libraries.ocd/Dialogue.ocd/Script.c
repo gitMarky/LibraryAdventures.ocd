@@ -55,7 +55,6 @@ public func DlgOption(string text)
 	{
 		dlg_internal[dlg_layer] += dlg_internal_option[dlg_layer];
 	}
-	//++dlg_internal;
 	return selected_previously; 
 }
 
@@ -99,7 +98,6 @@ public func DlgOptionEnd()
 		PopBack(dlg_option); // remove the last option
 	}
 	dlg_last_nonoption[dlg_layer] = dlg_internal[dlg_layer];
-	//++dlg_internal;
 }
 
 
@@ -189,16 +187,12 @@ private func ResetDialogue(int layer)
 		dlg_internal_option = [];
 		dlg_last_nonoption = [];
 		dlg_progress[0] = -1;
-//		dlg_internal[0] = -1;
-//		dlg_internal_option[0] = -1;
 		dlg_last_nonoption[0] = -1;
 		dlg_option = [];
 	}
 	else
 	{
 		dlg_progress[layer] = -1;
-//		dlg_internal[layer] = -1;
-//		dlg_internal_option[layer] = -1;
 		dlg_last_nonoption[layer] = -1;
 
 		// advance progress in the previous layer
