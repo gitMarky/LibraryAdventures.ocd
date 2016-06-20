@@ -28,7 +28,7 @@ public func DlgOption(string text)
 	// TODO
 	var internal = dlg_internal[dlg_layer] + dlg_internal_option[dlg_layer];
 	var selected_now = internal == dlg_progress[dlg_layer];
-	var selected_previously = IsValueInArray(dlg_option, internal);
+	var selected_previously = (dlg_option[dlg_layer] == internal);
 	var possible_option = dlg_internal[dlg_layer] >= dlg_progress[dlg_layer];
 	var under_text = dlg_progress[dlg_layer] == dlg_last_nonoption[dlg_layer];
 	var add_option = possible_option && under_text;
@@ -39,8 +39,8 @@ public func DlgOption(string text)
 		if (!selected_previously)
 		{
 			Log("* Going one layer deeper");
-			PushBack(dlg_option, internal); // save the latest option
-			++dlg_layer;
+			dlg_option[dlg_layer] = internal; // save the latest option
+			dlg_request_layer_increase = true;
 		}
 		ProgressDialogueDelayed();
 	}
@@ -152,6 +152,7 @@ local dlg_attention; // if set, a red attention mark is put above the clonk
 local dlg_option; // branch depth
 local dlg_listeners; // array of all objects that are listening to the dialogue
 local dlg_layer; // layer of the dialogue, important for options processing
+local dlg_request_layer_increase;
 
 
 //-------------------------------------------------------------------------
@@ -200,12 +201,21 @@ private func ResetDialogue(int layer)
 //		dlg_internal_option[layer] = -1;
 		dlg_last_nonoption[layer] = -1;
 
-		// advance progress in the previous layer		
-		if (layer > 0)
+		// advance progress in the previous layer
+		if (dlg_request_layer_increase)
 		{
-			dlg_layer -= 1;
-			dlg_progress[layer] += 1;
-			dlg_last_nonoption[layer] = dlg_progress;
+			dlg_layer += 1;
+			dlg_request_layer_increase = false;
+			ProgressDialogueDelayed(); // Go on in the next layer
+		}
+		else
+		{
+			if (layer > 0)
+			{
+				dlg_layer -= 1;
+				dlg_progress[layer] += 1;
+				dlg_last_nonoption[layer] = dlg_progress;
+			}
 		}
 	}
 }
@@ -328,14 +338,14 @@ private func DoBroadcast(string function, arg1, arg2, arg3, arg4, arg5, arg6, ar
 
 public func BroadcastDialogue(proplist message)
 {
-	Log("* Broadcasting dialogue %s", message.text);
+	//Log("* Broadcasting dialogue %s", message.text);
 	DoBroadcast("OnBroadcastDialogue", message);
 }
 
 
 public func BroadcastOption(proplist message)
 {
-	Log("* Broadcasting option %s", message.text);
+	//Log("* Broadcasting option %s", message.text);
 	DoBroadcast("OnBroadcastOption", message);
 }
 
