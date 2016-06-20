@@ -204,5 +204,5 @@ private func MessageBoxAddOption(proplist option)
 
 func FormatMenuCommand(string option_command, proplist option)
 {
-	return Format("%s(Object(%d), %v)", option_command, option.receiver->ObjectNumber(), option.override_progress);
+	return Format("%s(Object(%d), %v)", option_command, option.receiver->ObjectNumber(), option.option_choice);
 }

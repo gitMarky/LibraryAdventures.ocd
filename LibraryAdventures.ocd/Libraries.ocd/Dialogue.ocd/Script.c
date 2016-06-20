@@ -50,7 +50,7 @@ public func DlgOption(string text)
 	
 	if (display_option)
 	{
-		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player, override_progress = dlg_internal_option}); // the progress has to be set here, if the option is chosen!
+		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player, option_choice = dlg_internal_option[dlg_internal_layer]}); // the progress has to be set here, if the option is chosen!
 	}
 	
 	++dlg_internal_layer;
@@ -288,7 +288,7 @@ public func ProgressDialogue(object player, int option_choice)
 	dlg_progress[dlg_layer]++;
 
 	Log("-----------------------------------------");
-	Log("Progress dialogue: %v", dlg_progress);
+	Log("Progress dialogue: %v, layer = %v", dlg_progress, dlg_layer);
 	
 	dlg_internal_layer = 0;
 	for (var i = 0; i <= dlg_layer; ++i)
