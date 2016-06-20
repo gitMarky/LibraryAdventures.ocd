@@ -13,11 +13,12 @@
 public func DlgText(string text, object speaker)
 {
 	//Log("Progress is %d, visiting %d (%s), Layer = %d", dlg_progress[dlg_layer], dlg_internal[dlg_layer], text, dlg_layer);
+	++dlg_internal[dlg_internal_layer];
 	
 	var log_output = Format("L(%d)/I(%d): %s", dlg_internal_layer, dlg_internal[dlg_layer], text); 
 	
 	// TODO	
-	if (dlg_internal[dlg_layer] == dlg_progress[dlg_layer])
+	if (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer])
 	{
 		BroadcastDialogue({ Prototype = DlgMessage(), text = text, sender = speaker ?? dlg_target, receiver = dlg_player});
 		Log("* %s", log_output);
@@ -26,14 +27,14 @@ public func DlgText(string text, object speaker)
 	{
 		Log("  %s", log_output);
 	}	
-	++dlg_internal[dlg_internal_layer];
 }
 
 
 public func DlgOption(string text)
 {
+	++dlg_internal_option[dlg_internal_layer];
 	// TODO
-	var display_option = dlg_progress[dlg_layer] == (dlg_internal[dlg_layer] - 1);
+	var display_option = dlg_progress[dlg_layer] == dlg_internal[dlg_layer];
 	var was_chosen = dlg_option[dlg_internal_layer] == dlg_internal_option[dlg_internal_layer];
 	
 	var log_output = Format("L(%d)/I(%d): %s, display = %v, chosen = %v", dlg_internal_layer, dlg_internal[dlg_layer], text, display_option, was_chosen); 
@@ -51,10 +52,8 @@ public func DlgOption(string text)
 	if (display_option)
 	{
 		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player, option_choice = dlg_internal_option[dlg_internal_layer]}); // the progress has to be set here, if the option is chosen!
-	}
-	
+	}	
 	++dlg_internal_layer;
-	++dlg_internal_option[dlg_internal_layer];
 }
 
 
@@ -71,11 +70,12 @@ public func DlgOption(string text)
  */
 public func DlgReset()
 {
+	++dlg_internal[dlg_internal_layer];
 	var log_output = Format("L(%d)/I(%d): DlgReset()", dlg_internal_layer, dlg_internal[dlg_layer]); 
 
 	//Log("Progress is %d, resetting number is %d", dlg_progress, dlg_internal);
 	var execute_event = false;
-	if (dlg_internal[dlg_layer] == dlg_progress[dlg_layer])
+	if (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer])
 	{
 		execute_event = true;
 		ResetDialogue();
@@ -87,7 +87,6 @@ public func DlgReset()
 		Log("  %s", log_output);
 	}
 	
-	++dlg_internal[dlg_internal_layer];
 	return execute_event;
 }
 
@@ -98,7 +97,7 @@ public func DlgOptionEnd()
 	// TODO
 	// not sure if this is necessary
 	// it is!
-	if (dlg_internal[dlg_layer] == dlg_progress[dlg_layer])
+	if (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer])
 	{
 //			Log("* Going one layer higher");
 //		--dlg_layer;
@@ -132,6 +131,7 @@ public func DlgOptionEnd()
  */
 public func DlgEvent()
 {
+	++dlg_internal[dlg_internal_layer];
 	var log_output = Format("L(%d)/I(%d): DlgEvent()", dlg_layer, dlg_internal[dlg_layer]); 
 
 	var execute_event = false;
@@ -146,7 +146,6 @@ public func DlgEvent()
 		Log("  %s", log_output);
 	}
 	
-	++dlg_internal[dlg_internal_layer];
 	return execute_event;
 }
 
@@ -201,16 +200,14 @@ private func ResetDialogue(int layer)
 {
 	if (layer == nil)
 	{
-		dlg_layer = 0;
 		dlg_progress = [];
 		dlg_internal = [];
 		dlg_internal_option = [];
-		dlg_progress[0] = -1;
 		dlg_option = [];
 	}
 	else
 	{
-		dlg_progress[layer] = -1;
+		dlg_progress[layer] = 0;
 
 		// advance progress in the previous layer
 		if (layer > 0)
