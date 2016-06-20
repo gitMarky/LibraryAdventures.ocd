@@ -109,10 +109,10 @@ func Dlg_TestDlgOption3()
 		DlgOptionEnd();                       // -/3
 	}                                         //
 	DlgText("The end.");                      // 4
-	if (DlgOption("Restart (this option will always be present)"))
-	{
-		DlgReset();
-	}
+	//if (DlgOption("Restart (this option will always be present)"))
+	//{
+	//	DlgReset();
+	//}
 }
 
 
