@@ -305,9 +305,9 @@ public func ProgressDialogue(object player, int option_choice)
 	Call(fn_generic, player);
 	
 	//Log("--> After dialogue: progress %d, internal %d", dlg_progress, dlg_internal);
-	if (dlg_progress[dlg_layer] >= dlg_internal[dlg_layer])
+	if (dlg_progress[dlg_layer] > dlg_internal[dlg_layer])
 	{
-		ResetDialogue(dlg_layer);
+		ResetDialogue(); //dlg_layer);
 	}
 	
 	return true;
