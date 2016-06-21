@@ -75,7 +75,8 @@ public func DlgReset()
 	var log_output = Format("L(%d)/I(%d): DlgReset()", dlg_internal_layer, dlg_internal[dlg_layer]); 
 
 	var execute_event = false;
-	if (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer])
+	if ((dlg_layer == dlg_internal_layer)
+     && (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer]))
 	{
 		execute_event = true;
 		ResetDialogue();
@@ -196,8 +197,9 @@ protected func Destruction()
 
 private func ResetDialogue(int layer)
 {
-	if (layer == nil)
+	if (layer == nil || layer == 0)
 	{
+		dlg_layer = 0;
 		dlg_progress = [];
 		dlg_internal = [];
 		dlg_internal_option = [];
@@ -208,13 +210,10 @@ private func ResetDialogue(int layer)
 		dlg_progress[layer] = 0;
 
 		// advance progress in the previous layer
-		if (layer > 0)
-		{
-			dlg_layer -= 1;
-			dlg_internal_option = [];
-			dlg_option[dlg_layer] = nil;
-			dlg_progress[layer] = nil;
-		}
+		dlg_layer -= 1;
+		dlg_internal_option = [];
+		dlg_option[dlg_layer] = nil;
+		dlg_progress[layer] = nil;
 	}
 }
 

@@ -48,6 +48,7 @@ func Dlg_TestDlgOption2(object player)
 				{
 					test_forked_dialogues[0] = true;
 				}
+				DlgOptionEnd();
 			}
 			if (!test_forked_dialogues[1] && DlgOption("Option 1.2"))
 			{
@@ -57,6 +58,7 @@ func Dlg_TestDlgOption2(object player)
 				{
 					test_forked_dialogues[1] = true;
 				}
+				DlgOptionEnd();
 			}
 			DlgOptionEnd();
 		}
@@ -77,10 +79,12 @@ func Dlg_TestDlgOption2(object player)
 					{
 						test_forked_dialogues[2] = true;
 					}
+					DlgOptionEnd();
 				}
 				if (DlgOption("Return"))
 				{
 					DlgReset();
+					DlgOptionEnd();
 				}
 				DlgOptionEnd();
 			}
