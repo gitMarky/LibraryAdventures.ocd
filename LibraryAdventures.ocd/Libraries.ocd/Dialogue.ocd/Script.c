@@ -38,23 +38,23 @@ public func DlgOption(string text)
 	var was_chosen = dlg_option[dlg_internal_layer] == dlg_internal_option[dlg_internal_layer];
 	
 	var log_output = Format("L(%d)/I(%d): %s, display = %v, chosen = %v", dlg_internal_layer, dlg_internal[dlg_layer], text, display_option, was_chosen); 
+		
+	if (display_option)
+	{
+		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player, option_choice = dlg_internal_option[dlg_internal_layer]}); // the progress has to be set here, if the option is chosen!
+	}
 	
 	if (was_chosen)
 	{
 		Log("* %s", log_output);
+		++dlg_internal_layer;
 	}
 	else
 	{
 		Log("  %s", log_output);
 	}
 	
-	
-	if (display_option)
-	{
-		BroadcastOption({ Prototype = DlgMessage(), text = text, receiver = dlg_player, option_choice = dlg_internal_option[dlg_internal_layer]}); // the progress has to be set here, if the option is chosen!
-	}
-	
-	++dlg_internal_layer;
+	return was_chosen;
 }
 
 

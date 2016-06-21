@@ -93,15 +93,21 @@ func Dlg_TestDlgOption2(object player)
 func Dlg_TestDlgOption3()
 {
 	DlgText("This is an introduction.");
-	DlgOption("Option 1");
+	if (DlgOption("Option 1"))
+	{
 		DlgText("Continuing from option 1");
-	DlgOptionEnd();
-	DlgOption("Option 2");
+		DlgOptionEnd();
+	}
+	if (DlgOption("Option 2"))
+	{
 		DlgText("Continuing from option 2");
-	DlgOptionEnd();
-	DlgOption("Option 3");
+		DlgOptionEnd();
+	}
+	if (DlgOption("Option 3"))
+	{
 		DlgText("Continuing from option 3");
-	DlgOptionEnd();
+		DlgOptionEnd();
+	}
 	DlgText("The end.");
 	//if (DlgOption("Restart (this option will always be present)"))
 	//{
