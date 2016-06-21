@@ -303,10 +303,9 @@ public func ProgressDialogue(object player, int option_choice)
 	var fn_generic = Format("Dlg_%s", dlg_name);
 	Call(fn_generic, player);
 	
-	//Log("--> After dialogue: progress %d, internal %d", dlg_progress, dlg_internal);
 	if (dlg_progress[dlg_layer] > dlg_internal[dlg_layer])
 	{
-		ResetDialogue(); //dlg_layer);
+		ResetDialogue();
 	}
 	
 	return true;
@@ -336,14 +335,12 @@ private func DoBroadcast(string function, arg1, arg2, arg3, arg4, arg5, arg6, ar
 
 public func BroadcastDialogue(proplist message)
 {
-	//Log("* Broadcasting dialogue %s", message.text);
 	DoBroadcast("OnBroadcastDialogue", message);
 }
 
 
 public func BroadcastOption(proplist message)
 {
-	//Log("* Broadcasting option %s", message.text);
 	DoBroadcast("OnBroadcastOption", message);
 }
 
