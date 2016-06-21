@@ -7,7 +7,7 @@ protected func InitializePlayer(int plr)
 	SetFoW(false, plr);
 		
 	// Start!
-	LaunchTest(9);
+	LaunchTest(8);
 	return;
 }
 
@@ -485,7 +485,7 @@ global func Test7_OnFinished(){}
 // --------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------
 
-global func Test8_OnStart()
+global func Test9_OnStart()
 {
 	Log("Test for DlgOption(): Forked/multi-level options. The player has to visit all options");
 
@@ -495,7 +495,7 @@ global func Test8_OnStart()
 	return true;
 }
 
-global func Test8_Completed()
+global func Test9_Completed()
 {
 	if (MenuWasOpened() && MenuWasClosed())
 	{
@@ -508,12 +508,12 @@ global func Test8_Completed()
 	}
 }
 
-global func Test8_OnFinished(){}
+global func Test9_OnFinished(){}
 
 // --------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------
 
-global func Test9_OnStart()
+global func Test8_OnStart()
 {
 	Log("Test for DlgOption(): Options that are always present?");
 
@@ -523,7 +523,7 @@ global func Test9_OnStart()
 	return true;
 }
 
-global func Test9_Completed()
+global func Test8_Completed()
 {
 	if (MenuWasOpened() && MenuWasClosed())
 	{
@@ -535,5 +535,5 @@ global func Test9_Completed()
 	}
 }
 
-global func Test9_OnFinished(){}
+global func Test8_OnFinished(){}
 
