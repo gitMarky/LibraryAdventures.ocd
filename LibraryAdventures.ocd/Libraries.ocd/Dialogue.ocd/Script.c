@@ -12,13 +12,12 @@
  */
 public func DlgText(string text, object speaker)
 {
-	//Log("Progress is %d, visiting %d (%s), Layer = %d", dlg_progress[dlg_layer], dlg_internal[dlg_layer], text, dlg_layer);
 	++dlg_internal[dlg_internal_layer];
 	
 	var log_output = Format("L(%d)/I(%d): %s", dlg_internal_layer, dlg_internal[dlg_layer], text); 
 	
-	// TODO	
-	if (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer])
+	if ((dlg_layer == dlg_internal_layer)
+	 && (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer]))
 	{
 		BroadcastDialogue({ Prototype = DlgMessage(), text = text, sender = speaker ?? dlg_target, receiver = dlg_player});
 		Log("* %s", log_output);
@@ -33,7 +32,7 @@ public func DlgText(string text, object speaker)
 public func DlgOption(string text)
 {
 	++dlg_internal_option[dlg_internal_layer];
-	// TODO
+
 	var display_option = (dlg_layer == dlg_internal_layer)
 	                  && (dlg_progress[dlg_layer] == dlg_internal[dlg_layer]);
 	var was_chosen = dlg_option[dlg_internal_layer] == dlg_internal_option[dlg_internal_layer];
@@ -75,7 +74,6 @@ public func DlgReset()
 	++dlg_internal[dlg_internal_layer];
 	var log_output = Format("L(%d)/I(%d): DlgReset()", dlg_internal_layer, dlg_internal[dlg_layer]); 
 
-	//Log("Progress is %d, resetting number is %d", dlg_progress, dlg_internal);
 	var execute_event = false;
 	if (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer])
 	{
@@ -97,12 +95,9 @@ public func DlgOptionEnd()
 {
 	++dlg_internal[dlg_internal_layer];
 	var log_output = Format("L(%d)/I(%d): DlgOptionEnd()", dlg_internal_layer, dlg_internal[dlg_layer]); 
-	// TODO
-	// not sure if this is necessary
-	// it is!
+
 	if ((dlg_layer == dlg_internal_layer) && (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer]))
 	{
-		//dlg_option[dlg_internal_layer] = nil;
 		Log("* %s", log_output);
 		ResetDialogue(dlg_layer);
 		ProgressDialogueDelayed();
@@ -219,7 +214,6 @@ private func ResetDialogue(int layer)
 			dlg_internal_option = [];
 			dlg_option[dlg_layer] = nil;
 			dlg_progress[layer] = nil;
-			//dlg_progress[dlg_layer] += 1;
 		}
 	}
 }
