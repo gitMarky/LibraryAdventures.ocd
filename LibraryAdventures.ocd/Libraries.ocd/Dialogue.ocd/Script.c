@@ -23,6 +23,50 @@ public func DlgText(string text, object speaker)
 }
 
 
+/**
+ Adds a dialogue option.
+ @par text this text will be displayed.
+ @example Did you ever want to be in a game show?
+  {@code
+     Dlg_Options(object player)
+     {
+         DlgText("Choose one:");
+         if (DlgOption("Door A"))
+         {
+         	DlgText("Your choice was door A!");
+         	if (DlgEvent()) ConfirmChoice("A");
+         	DlgOptionEnd();
+         }
+         if (DlgOption("Door B"))
+         {
+         	DlgText("Your choice was door B!");
+         	if (DlgEvent()) ConfirmChoice("B");
+         	DlgOptionEnd();
+         }
+         if (DlgOption("Door D"))
+         {
+         	DlgText("Your choice was door C!");
+         	if (DlgEvent()) ConfirmChoice("C");
+         	DlgOptionEnd();
+         }
+         // if the dialoge options do not branch any further, then the dialogue will continue here
+         DlgText("This door does not contain the price:");
+         if (DlgEvent()) RevealDoorWithGoat();
+         DlgText("Would you like to choose the other door?");
+         if (DlgOption("Yes"))
+         {
+         	if (DlgEvent()) SwitchChoice();
+         	DlgOptionEnd();
+         }
+         if (DlgOption("No"))
+         {
+         	if (DlgEvent()) StayWithChoice();
+         	DlgOptionEnd();
+         }
+     }
+ }
+ @related {@link Library_Dialogue#DlgOptionEnd}
+ */
 public func DlgOption(string text)
 {
 	++dlg_internal_option[dlg_internal_layer];
@@ -48,13 +92,37 @@ public func DlgOption(string text)
 
 
 /**
+ This tells the dialogue engine that the contents of an option are ended.
+ Unintended effects may occurr if you do not put this at the end of an
+ {@code if(DlgOption(...))}-block.
+ @related {@link Library_Dialogue#DlgOption} 
+ */
+public func DlgOptionEnd()
+{
+	++dlg_internal[dlg_internal_layer];
+	var debug_log = Format("L(%d)/I(%d): DlgOptionEnd()", dlg_internal_layer, dlg_internal[dlg_layer]); 
+
+	if (IsBeingProcessed(debug_log))
+	{
+		ResetDialogue(dlg_layer);
+		ProgressDialogueDelayed();
+	}
+	
+	--dlg_internal_layer;
+}
+
+
+/**
  Resets the dialogue, that is, the dialogue will start at the beginning again.
  @example This will create an endless loop:
  {@code
      Dlg_Loop(object player)
      {
          DlgText("Are you tired of this message yet?");
-         DlgReset(); // starts the dialogue again
+         if (DlgReset()) // starts the dialogue again
+         {
+         	Log("The player did not quit until loop #%d", loop_counter++); // we will log how patient the player was :p
+         }
      }
  }
  */
@@ -72,21 +140,6 @@ public func DlgReset()
 	}
 	
 	return execute_event;
-}
-
-
-public func DlgOptionEnd()
-{
-	++dlg_internal[dlg_internal_layer];
-	var debug_log = Format("L(%d)/I(%d): DlgOptionEnd()", dlg_internal_layer, dlg_internal[dlg_layer]); 
-
-	if (IsBeingProcessed(debug_log))
-	{
-		ResetDialogue(dlg_layer);
-		ProgressDialogueDelayed();
-	}
-	
-	--dlg_internal_layer;
 }
 
 
