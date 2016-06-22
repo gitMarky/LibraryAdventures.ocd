@@ -10,7 +10,7 @@ func Dlg_TestDlgOption1(object player)
 	{
 		DlgText("You chose option 1. Starting again.");
 		DlgReset();
-//		DlgOptionEnd();
+		DlgOptionEnd();
 	}
 	if (DlgOption("Option 2: This will end the dialogue."))
 	{
@@ -113,14 +113,30 @@ func Dlg_TestDlgOption3()
 		DlgOptionEnd();
 	}
 	DlgText("The end.");
-	//if (DlgOption("Restart (this option will always be present)"))
-	//{
-	//	DlgReset();
-	//}
+}
+
+
+func TestDlgOption4()
+{
+	DlgText("You will have 3 options:");
+	if (DlgOption("Option 1"))
+	{
+		DlgText("Option 2 and option 3 should be available");
+	}
+	if (DlgOption("Option 2"))
+	{
+		DlgText("Option 3 should be available");
+	}
+	if (DlgOption("Option 3"))
+	{
+		DlgText("No option should be available");
+	}
+	DlgOptionEnd();
+	DlgText("The end.");
 }
 
 
 func DebugDlg()
 {
-	Log(">>> Debug: dlg_internal = %d, dlg_progress = %d, dlg_option = %v", dlg_internal, dlg_progress, dlg_option);
+	Log(">>> Debug: dlg_internal = %v, dlg_progress = %v, dlg_option = %v", dlg_internal, dlg_progress, dlg_option);
 }

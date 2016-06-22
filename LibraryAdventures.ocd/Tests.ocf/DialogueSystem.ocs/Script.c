@@ -7,7 +7,7 @@ protected func InitializePlayer(int plr)
 	SetFoW(false, plr);
 		
 	// Start!
-	LaunchTest(8);
+	LaunchTest(10);
 	return;
 }
 
@@ -515,7 +515,7 @@ global func Test9_OnFinished(){}
 
 global func Test8_OnStart()
 {
-	Log("Test for DlgOption(): Options that are always present?");
+	Log("Test for DlgOption(): Options that brannch from and return to the main dialogue path");
 
 	Test().dialogue = Test().target->SetDialogueEx("TestDlgOption3");
 	Test().dialogue->Interact(Test().user);
@@ -536,4 +536,31 @@ global func Test8_Completed()
 }
 
 global func Test8_OnFinished(){}
+
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+
+global func Test10_OnStart()
+{
+	Log("Test for DlgOption(): Cascding options if DlgOptionEnd is not in place.");
+
+	Test().dialogue = Test().target->SetDialogueEx("TestDlgOption4");
+	Test().dialogue->Interact(Test().user);
+
+	return true;
+}
+
+global func Test10_Completed()
+{
+	if (MenuWasOpened() && MenuWasClosed())
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+global func Test10_OnFinished(){}
 
