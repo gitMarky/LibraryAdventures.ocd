@@ -16,7 +16,7 @@ public func DlgText(string text, object speaker)
 	
 	var log_output = Format("L(%d)/I(%d): %s", dlg_internal_layer, dlg_internal[dlg_layer], text); 
 	
-	if ((dlg_layer == dlg_internal_layer)
+	if (IsLayerCorrect()
 	 && (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer]))
 	{
 		BroadcastDialogue({ Prototype = DlgMessage(), text = text, sender = speaker ?? dlg_target, receiver = dlg_player});
@@ -33,7 +33,7 @@ public func DlgOption(string text)
 {
 	++dlg_internal_option[dlg_internal_layer];
 
-	var display_option = (dlg_layer == dlg_internal_layer)
+	var display_option = IsLayerCorrect()
 	                  && (dlg_progress[dlg_layer] == dlg_internal[dlg_layer]);
 	var was_chosen = dlg_option[dlg_internal_layer] == dlg_internal_option[dlg_internal_layer];
 	
@@ -75,7 +75,7 @@ public func DlgReset()
 	var log_output = Format("L(%d)/I(%d): DlgReset()", dlg_internal_layer, dlg_internal[dlg_layer]); 
 
 	var execute_event = false;
-	if ((dlg_layer == dlg_internal_layer)
+	if (IsLayerCorrect()
      && (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer]))
 	{
 		execute_event = true;
@@ -97,7 +97,7 @@ public func DlgOptionEnd()
 	++dlg_internal[dlg_internal_layer];
 	var log_output = Format("L(%d)/I(%d): DlgOptionEnd()", dlg_internal_layer, dlg_internal[dlg_layer]); 
 
-	if ((dlg_layer == dlg_internal_layer) && (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer]))
+	if (IsLayerCorrect() && (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer]))
 	{
 		Log("* %s", log_output);
 		ResetDialogue(dlg_layer);
@@ -222,6 +222,12 @@ private func InDialogue(object player)
 {
 	return player->GetMenu() == Dialogue
 	    || player->GetMenu() == DialogueEx;
+}
+
+
+private func IsLayerCorrect()
+{
+	return dlg_internal_layer == dlg_layer;
 }
 
 
