@@ -14,17 +14,12 @@ public func DlgText(string text, object speaker)
 {
 	++dlg_internal[dlg_internal_layer];
 	
-	var log_output = Format("L(%d)/I(%d): %s", dlg_internal_layer, dlg_internal[dlg_layer], text); 
+	var debug_log = Format("L(%d)/I(%d): %s", dlg_internal_layer, dlg_internal[dlg_layer], text); 
 	
-	if (IsLayerCorrect() && IsAtThisPosition())
+	if (IsBeingProcessed(debug_log))
 	{
 		BroadcastDialogue({ Prototype = DlgMessage(), text = text, sender = speaker ?? dlg_target, receiver = dlg_player});
-		Log("* %s", log_output);
 	}
-	else
-	{
-		Log("  %s", log_output);
-	}	
 }
 
 
@@ -35,7 +30,7 @@ public func DlgOption(string text)
 	var display_option = IsLayerCorrect() && IsAtThisPosition();
 	var was_chosen = dlg_option[dlg_internal_layer] == dlg_internal_option[dlg_internal_layer];
 	
-	var log_output = Format("L(%d)/I(%d): %s, display = %v, chosen = %v", dlg_internal_layer, dlg_internal[dlg_layer], text, display_option, was_chosen); 
+	var debug_log = Format("L(%d)/I(%d): %s, display = %v, chosen = %v", dlg_internal_layer, dlg_internal[dlg_layer], text, display_option, was_chosen); 
 		
 	if (display_option)
 	{
@@ -44,13 +39,9 @@ public func DlgOption(string text)
 	
 	if (was_chosen)
 	{
-		Log("* %s", log_output);
 		++dlg_internal_layer;
 	}
-	else
-	{
-		Log("  %s", log_output);
-	}
+	LogDlgSelection(was_chosen, debug_log, ">");
 	
 	return was_chosen;
 }
@@ -70,19 +61,14 @@ public func DlgOption(string text)
 public func DlgReset()
 {
 	++dlg_internal[dlg_internal_layer];
-	var log_output = Format("L(%d)/I(%d): DlgReset()", dlg_internal_layer, dlg_internal[dlg_layer]); 
+	var debug_log = Format("L(%d)/I(%d): DlgReset()", dlg_internal_layer, dlg_internal[dlg_layer]); 
 
 	var execute_event = false;
-	if (IsLayerCorrect() && IsAtThisPosition())
+	if (IsBeingProcessed(debug_log))
 	{
 		execute_event = true;
 		ResetDialogue();
 		ProgressDialogueDelayed();
-		Log("* %s", log_output);
-	}
-	else
-	{
-		Log("  %s", log_output);
 	}
 	
 	return execute_event;
@@ -92,17 +78,12 @@ public func DlgReset()
 public func DlgOptionEnd()
 {
 	++dlg_internal[dlg_internal_layer];
-	var log_output = Format("L(%d)/I(%d): DlgOptionEnd()", dlg_internal_layer, dlg_internal[dlg_layer]); 
+	var debug_log = Format("L(%d)/I(%d): DlgOptionEnd()", dlg_internal_layer, dlg_internal[dlg_layer]); 
 
-	if (IsLayerCorrect() && IsAtThisPosition())
+	if (IsBeingProcessed(debug_log))
 	{
-		Log("* %s", log_output);
 		ResetDialogue(dlg_layer);
 		ProgressDialogueDelayed();
-	}
-	else
-	{
-		Log("  %s", log_output);
 	}
 	
 	--dlg_internal_layer;
@@ -128,18 +109,13 @@ public func DlgOptionEnd()
 public func DlgEvent()
 {
 	++dlg_internal[dlg_internal_layer];
-	var log_output = Format("L(%d)/I(%d): DlgEvent()", dlg_layer, dlg_internal[dlg_layer]); 
+	var debug_log = Format("L(%d)/I(%d): DlgEvent()", dlg_layer, dlg_internal[dlg_layer]); 
 
 	var execute_event = false;
-	if (IsLayerCorrect() && IsAtThisPosition())
+	if (IsBeingProcessed(debug_log))
 	{
 		execute_event = true;
 		ProgressDialogueDelayed();
-		Log("* %s", log_output);
-	} // progress should be increased too
-	else
-	{
-		Log("  %s", log_output);
 	}
 	
 	return execute_event;
@@ -222,6 +198,14 @@ private func InDialogue(object player)
 }
 
 
+private func IsBeingProcessed(string debug_message)
+{
+	var result = IsLayerCorrect() && IsAtThisPosition();
+	LogDlgSelection(result, debug_message);	
+	return result;
+}
+
+
 private func IsLayerCorrect()
 {
 	return dlg_internal_layer == dlg_layer;
@@ -230,6 +214,20 @@ private func IsLayerCorrect()
 private func IsAtThisPosition()
 {
 	return dlg_internal[dlg_layer] == dlg_progress[dlg_layer];
+}
+
+private func LogDlgSelection(bool result, string debug_message, string selected_string)
+{
+	selected_string = selected_string ?? "*";
+
+	if (debug_message)
+	{
+		if (result)
+			Log("%s %s", selected_string, debug_message);
+		else
+			Log("  %s", debug_message);
+	}
+	return result;
 }
 
 
