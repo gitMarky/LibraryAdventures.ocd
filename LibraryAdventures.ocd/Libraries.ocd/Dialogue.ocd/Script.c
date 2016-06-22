@@ -16,8 +16,7 @@ public func DlgText(string text, object speaker)
 	
 	var log_output = Format("L(%d)/I(%d): %s", dlg_internal_layer, dlg_internal[dlg_layer], text); 
 	
-	if (IsLayerCorrect()
-	 && (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer]))
+	if (IsLayerCorrect() && IsAtThisPosition())
 	{
 		BroadcastDialogue({ Prototype = DlgMessage(), text = text, sender = speaker ?? dlg_target, receiver = dlg_player});
 		Log("* %s", log_output);
@@ -33,8 +32,7 @@ public func DlgOption(string text)
 {
 	++dlg_internal_option[dlg_internal_layer];
 
-	var display_option = IsLayerCorrect()
-	                  && (dlg_progress[dlg_layer] == dlg_internal[dlg_layer]);
+	var display_option = IsLayerCorrect() && IsAtThisPosition();
 	var was_chosen = dlg_option[dlg_internal_layer] == dlg_internal_option[dlg_internal_layer];
 	
 	var log_output = Format("L(%d)/I(%d): %s, display = %v, chosen = %v", dlg_internal_layer, dlg_internal[dlg_layer], text, display_option, was_chosen); 
@@ -75,8 +73,7 @@ public func DlgReset()
 	var log_output = Format("L(%d)/I(%d): DlgReset()", dlg_internal_layer, dlg_internal[dlg_layer]); 
 
 	var execute_event = false;
-	if (IsLayerCorrect()
-     && (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer]))
+	if (IsLayerCorrect() && IsAtThisPosition())
 	{
 		execute_event = true;
 		ResetDialogue();
@@ -97,7 +94,7 @@ public func DlgOptionEnd()
 	++dlg_internal[dlg_internal_layer];
 	var log_output = Format("L(%d)/I(%d): DlgOptionEnd()", dlg_internal_layer, dlg_internal[dlg_layer]); 
 
-	if (IsLayerCorrect() && (dlg_internal[dlg_layer] == dlg_progress[dlg_internal_layer]))
+	if (IsLayerCorrect() && IsAtThisPosition())
 	{
 		Log("* %s", log_output);
 		ResetDialogue(dlg_layer);
@@ -134,7 +131,7 @@ public func DlgEvent()
 	var log_output = Format("L(%d)/I(%d): DlgEvent()", dlg_layer, dlg_internal[dlg_layer]); 
 
 	var execute_event = false;
-	if (dlg_internal[dlg_layer] == dlg_progress[dlg_layer])
+	if (IsLayerCorrect() && IsAtThisPosition())
 	{
 		execute_event = true;
 		ProgressDialogueDelayed();
@@ -228,6 +225,11 @@ private func InDialogue(object player)
 private func IsLayerCorrect()
 {
 	return dlg_internal_layer == dlg_layer;
+}
+
+private func IsAtThisPosition()
+{
+	return dlg_internal[dlg_layer] == dlg_progress[dlg_layer];
 }
 
 
