@@ -116,7 +116,7 @@ func Dlg_TestDlgOption3()
 }
 
 
-func TestDlgOption4()
+func Dlg_TestDlgOption4()
 {
 	DlgText("You will have 3 options:");
 	if (DlgOption("Option 1"))
