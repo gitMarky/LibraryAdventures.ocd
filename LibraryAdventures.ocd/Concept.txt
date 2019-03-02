@@ -43,12 +43,12 @@ Nur das zu implementieren ist etwas komplizierter :P
 -------------------------------
 
 Genau, das was du in dem neuen Beispiel ansprichst, ist mir auch noch aufgefallen: Wenn man eine Abfolge von mehreren Textboxen hat, dann sind es momentan immer wieder dieselben Zeilen mit anderem Text und anderer Dialog-Nummer.
-Die Nummern würde ich beibehalten, damit man von einer Option zu einer anderen springen kann.
+Die Nummern wï¿½rde ich beibehalten, damit man von einer Option zu einer anderen springen kann.
 
-Evtl. ist es auch sinnvoller, bei einem Dialog die gültigen Kinder-Optionen anzugeben anstatt der erlauben Eltern-Optionen, in folgenden Modi:
+Evtl. ist es auch sinnvoller, bei einem Dialog die gï¿½ltigen Kinder-Optionen anzugeben anstatt der erlauben Eltern-Optionen, in folgenden Modi:
 a) Alle Optionen anzeigen
 b) Alle Optionen zu einem bestimmten Thema = String anzeigen
-c) Nur Optionen des aktuellen Pfads anzeigen (das dürfte obsolet sein, wenn die Pfade ohne weitere Auswahlmöglichkeit sowieso anders behandelt werden)
-d) Zusätzliche spezifische Optionen nach Dialog-Nummer.
+c) Nur Optionen des aktuellen Pfads anzeigen (das dï¿½rfte obsolet sein, wenn die Pfade ohne weitere Auswahlmï¿½glichkeit sowieso anders behandelt werden)
+d) Zusï¿½tzliche spezifische Optionen nach Dialog-Nummer.
 
-Es müsste außerdem beide Möglichkeiten zum Abrufen von Variablen geben, per eval() und normal. Ich habe die eval-Dinger z.b. eingebaut weil das Aufbauen zu Laufzeit auch ein Hindernis hat: Ich muss den Dialog jedesmal neu Aufbauen und auswerten, um die aktuellen Inhalt der benutzten Variablen zu haben. Bei der Array-Methode wurden jeweils nur die Variablen abgefragt, die ich gerade als Condition/Event prüfe. Ist verständlich, was ich meine? 
+Es mï¿½sste auï¿½erdem beide Mï¿½glichkeiten zum Abrufen von Variablen geben, per eval() und normal. Ich habe die eval-Dinger z.b. eingebaut weil das Aufbauen zu Laufzeit auch ein Hindernis hat: Ich muss den Dialog jedesmal neu Aufbauen und auswerten, um die aktuellen Inhalt der benutzten Variablen zu haben. Bei der Array-Methode wurden jeweils nur die Variablen abgefragt, die ich gerade als Condition/Event prï¿½fe. Ist verstï¿½ndlich, was ich meine? 
